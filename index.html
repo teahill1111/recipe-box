@@ -542,9 +542,12 @@ footer .f-name svg { width: 22px; height: 22px; }
   const colorOf = (i) => COLORS[i % COLORS.length];
 
   // ---------- 잘 먹었어요 (하트) ----------
-  const LIKE_URL = (CFG.likeUrl || "").trim();
-  const PENDING_KEY = "seon-table-likes-pending";
-  const canLike = () => !!LIKE_URL && !state.example;
+  // 하트는 각자의 폰(브라우저)에만 저장됩니다. 다른 사람에게는 보이지 않습니다.
+  const LIKES_KEY = "seon-table-likes";
+  const canLike = () => !state.example;
+  function readLikes() { try { return JSON.parse(localStorage.getItem(LIKES_KEY) || "{}") || {}; } catch (e) { return {}; } }
+  function writeLikes(l) { try { localStorage.setItem(LIKES_KEY, JSON.stringify(l)); return true; } catch (e) { return false; } }
+  function applyLikes(list) { const l = readLikes(); list.forEach((r) => { r.kidLikes = !!l[r.title]; }); return list; }
   function heartBtn(r) {
     return '<button class="heart" type="button" data-like aria-pressed="' + !!r.kidLikes + '" aria-label="' + esc(r.title) + ' 잘 먹었어요 표시">' +
       '<svg><use href="#' + (r.kidLikes ? "heart" : "heart-o") + '"/></svg></button>';
@@ -563,42 +566,19 @@ footer .f-name svg { width: 22px; height: 22px; }
     const t = $("toast"); t.textContent = msg; t.hidden = false;
     clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 2200);
   }
-  // 시트 반영이 늦게 보일 수 있어, 방금 누른 값은 잠시 이 폰에 기억해 둡니다
-  function readPending() { try { return JSON.parse(localStorage.getItem(PENDING_KEY) || "{}"); } catch (e) { return {}; } }
-  function writePending(p) { try { localStorage.setItem(PENDING_KEY, JSON.stringify(p)); } catch (e) {} }
-  function applyPending(list) {
-    const p = readPending(), now = Date.now(); let changed = false;
-    Object.keys(p).forEach((k) => {
-      if (now - p[k].at > 120000) { delete p[k]; changed = true; return; }
-      list.forEach((r) => { if (r.title === k) r.kidLikes = p[k].on; });
-    });
-    if (changed) writePending(p);
-    return list;
-  }
-  async function toggleLike(i) {
+  function toggleLike(i) {
     const r = state.recipes[i]; if (!r || !canLike()) return;
     const on = !r.kidLikes;
-    const setAll = (v) => {
-      state.recipes.forEach((x) => { if (x.title === r.title) x.kidLikes = v; });
-      document.querySelectorAll('.card[data-i] .heart[data-like]').forEach((b) => {
-        const x = state.recipes[+b.closest(".card").dataset.i]; if (x && x.title === r.title) paintHeart(b, v);
-      });
-      if (state.openIdx >= 0 && state.recipes[state.openIdx].title === r.title) paintDetailLike(state.recipes[state.openIdx]);
-    };
-    setAll(on);
-    const p = readPending(); p[r.title] = { on, at: Date.now() }; writePending(p);
-    toast(on ? "♥ 잘 먹었어요로 표시했어요" : "표시를 지웠어요");
-    try {
-      const res = await fetch(LIKE_URL + "?action=like&value=" + (on ? 1 : 0) + "&title=" + encodeURIComponent(r.title));
-      const j = await res.json();
-      if (!j.ok) throw new Error(j.error || "fail");
-      writeCache(state.recipes);
-    } catch (e) {
-      setAll(!on);
-      const q = readPending(); delete q[r.title]; writePending(q);
-      toast("저장하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.");
-    }
+    const l = readLikes(); if (on) l[r.title] = Date.now(); else delete l[r.title];
+    const saved = writeLikes(l);
+    state.recipes.forEach((x) => { if (x.title === r.title) x.kidLikes = on; });
+    document.querySelectorAll(".card[data-i] .heart[data-like]").forEach((b) => {
+      const x = state.recipes[+b.closest(".card").dataset.i]; if (x && x.title === r.title) paintHeart(b, on);
+    });
+    if (state.openIdx >= 0 && state.recipes[state.openIdx].title === r.title) paintDetailLike(state.recipes[state.openIdx]);
+    toast(!saved ? "이 브라우저에서는 하트를 저장할 수 없어요" : on ? "♥ 잘 먹었어요로 표시했어요" : "표시를 지웠어요");
   }
+
 
   // ---------- baby age ----------
   (function () {
@@ -660,7 +640,7 @@ footer .f-name svg { width: 22px; height: 22px; }
     source: /출처|원작|작성자/,
     photo: /사진|이미지|photo|image/i,
     url: /링크|인스타|url|주소/i,
-    kidLikes: /잘\s*먹|좋아|⭐|별/,
+    likesCol: /잘\s*먹|좋아|⭐|별/, // 시트 칸은 읽지 않음 (하트는 폰에만 저장)
   };
   function rowsToRecipes(rows) {
     if (!rows.length) return [];
@@ -870,7 +850,7 @@ footer .f-name svg { width: 22px; height: 22px; }
       render(); return;
     }
     const cached = readCache();
-    if (cached && cached.recipes && !state.loaded) { state.recipes = cached.recipes; state.loaded = true; render(); }
+    if (cached && cached.recipes && !state.loaded) { state.recipes = applyLikes(cached.recipes); state.loaded = true; render(); }
     $("status").hidden = false;
     $("status").textContent = "레시피를 불러오는 중이에요…";
     const ctrl = new AbortController();
@@ -881,7 +861,7 @@ footer .f-name svg { width: 22px; height: 22px; }
       const text = await res.text();
       if (/^\s*</.test(text)) throw new Error("not-csv");
       const recipes = rowsToRecipes(parseCSV(text));
-      state.recipes = applyPending(recipes); state.example = false; state.loaded = true;
+      state.recipes = applyLikes(recipes); state.example = false; state.loaded = true;
       writeCache(recipes); notice("");
     } catch (e) {
       state.loaded = true;
