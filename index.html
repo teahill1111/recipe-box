@@ -201,6 +201,9 @@ footer .f-name svg { width: 22px; height: 22px; }
 .sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .sheet-top h2 { font-size: 1.85rem; line-height: 1.25; overflow-wrap: anywhere; margin-top: 4px; }
 .sheet-top .cat { display: inline-block; font-size: .85rem; font-weight: 700; padding: 2px 10px; border-radius: 6px; background: var(--green); color: var(--green-ink); margin-top: 6px; }
+.src { font-size: .85rem; color: var(--muted); overflow-wrap: anywhere; }
+.sheet .src { margin-top: 4px; }
+.sheet .src a { color: var(--green-deep); }
 .likes { font-size: .98rem; font-weight: 700; color: var(--pink-deep); margin-top: 4px; }
 .close { flex: none; width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 1.4rem; }
 .btn-yellow { background: var(--yellow); color: #3b2f0a; align-self: stretch; }
@@ -438,6 +441,7 @@ footer .f-name svg { width: 22px; height: 22px; }
         <span class="cat" id="dCat"></span>
         <h2 id="dTitle"></h2>
         <div class="likes" id="dLikes" hidden>♥ 아기가 잘 먹었어요</div>
+        <div class="src" id="dSrc" hidden></div>
       </div>
       <button class="close" id="dClose" type="button" aria-label="닫기">×</button>
     </div>
@@ -574,6 +578,7 @@ footer .f-name svg { width: 22px; height: 22px; }
     memo: /메모|비법/,
     steps: /만드는|방법|레시피/,
     time: /시간/,
+    source: /출처|원작|작성자/,
     photo: /사진|이미지|photo|image/i,
     url: /링크|인스타|url|주소/i,
     kidLikes: /잘\s*먹|좋아|⭐|별/,
@@ -607,6 +612,7 @@ footer .f-name svg { width: 22px; height: 22px; }
         photo: photoUrl(get(r, "photo")),
         kidLikes: !!like && !/^(x|n|no|아니|false|0|-)$/i.test(like),
         group: get(r, "group"),
+        source: get(r, "source"),
       };
     }).filter((r) => r.title);
     const seen = {};
@@ -697,6 +703,7 @@ footer .f-name svg { width: 22px; height: 22px; }
         '<div class="card-body">' + groupHTML(r, terms) +
         '<h3><button class="open" type="button">' + highlight(r.title, terms) + "</button></h3>" +
         (r.ingredients.length ? '<p class="ings">' + highlight(r.ingredients.join(", "), terms) + "</p>" : '<p class="ings">재료는 아직 적지 않았어요.</p>') +
+        (r.source ? '<p class="src">출처 · ' + esc(r.source) + "</p>" : "") +
         '<div class="card-foot">' +
         (r.url ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">인스타에서 보기 ↗</a>' : '<span class="meta">자세히 보기 →</span>') +
         '<span class="meta">' + [r.time ? "⏱ " + r.time : "", r.ingredients.length ? "재료 " + r.ingredients.length + "가지" : ""].filter(Boolean).join(" · ") + "</span>" +
@@ -719,6 +726,13 @@ footer .f-name svg { width: 22px; height: 22px; }
     $("dCat").textContent = r.category + (r.time ? " · ⏱ " + r.time : "");
     $("dTitle").textContent = r.title;
     $("dLikes").hidden = !r.kidLikes;
+    const src = $("dSrc"); src.hidden = !r.source; src.innerHTML = "";
+    if (r.source) {
+      src.append("출처 · ");
+      const h = (r.source.match(/^@([\w.]+)/) || [])[1];
+      if (h) { const a = document.createElement("a"); a.href = "https://www.instagram.com/" + h + "/"; a.target = "_blank"; a.rel = "noopener"; a.textContent = r.source; src.append(a); }
+      else src.append(r.source);
+    }
     const link = $("dLink");
     link.hidden = !r.url; if (r.url) link.href = r.url;
     $("dIngs").innerHTML = (r.amounts || r.ingredients).map((x) => "<li>" + esc(x) + "</li>").join("") || "<li>적어 둔 재료가 없어요</li>";
