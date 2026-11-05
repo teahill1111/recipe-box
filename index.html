@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>세온 식탁</title>
+<meta name="description" content="할머니의 레시피 노트 — 인스타그램에서 저장한 아기 밥 레시피를 재료와 요리 이름으로 찾아봅니다.">
+<meta name="theme-color" content="#fff8f0">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="세온 식탁">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap">
+<style>
+/* Layout: warm cream recipe notebook — header bar, hero with a hand-drawn plate, then a grid of pastel recipe cards. Large type for older eyes. */
+:root {
+  --bg: #fff8f0;
+  --surface: #fffdf9;
+  --ink: #2f3a2c;
+  --muted: #6d7266;
+  --line: #efe3d3;
+  --green: #a8d8a3;
+  --green-deep: #5e8b57;
+  --green-ink: #24401f;
+  --yellow: #ffd966;
+  --yellow-deep: #e2b740;
+  --blue: #a9cff5;
+  --blue-deep: #6b95c4;
+  --pink: #ffb4a6;
+  --pink-deep: #d07d70;
+  --note: #fff0cc;
+  --note-line: #f4d37a;
+  --mark: #ffe48a;
+  --paper: #fffdf6;
+  --font: "Nanum Gothic", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --r: 16px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1f1a; --surface: #262a23; --ink: #f1eee6; --muted: #b5b0a3; --line: #3a3f35;
+    --green: #4e7a4a; --green-deep: #a8d8a3; --green-ink: #eaf6e7;
+    --yellow: #c9a43a; --yellow-deep: #f0cd62;
+    --blue: #3f6688; --blue-deep: #a9cff5; --pink: #94574e; --pink-deep: #ffb4a6;
+    --note: #3a3322; --note-line: #7a6426; --mark: #6b5a17; --paper: #f4efe2;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font); font-size: 18px; line-height: 1.6;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+[hidden] { display: none !important; }
+h1, h2, h3 { margin: 0; text-wrap: balance; font-weight: 800; letter-spacing: -0.02em; }
+p { margin: 0; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--yellow-deep); outline-offset: 2px; border-radius: 6px; }
+.inner {
+  max-width: 1100px; margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+.eyebrow { font-size: .9rem; color: var(--green-deep); letter-spacing: .04em; }
+
+/* header */
+.topbar { border-bottom: 1px solid var(--line); }
+.topbar .inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 22px; }
+.brand { display: flex; align-items: center; gap: 14px; min-width: 0; flex-wrap: wrap; }
+.brand-name { display: flex; align-items: center; gap: 8px; font-size: 1.55rem; font-weight: 800; color: var(--ink); text-decoration: none; }
+.brand-name svg { width: 40px; height: 40px; flex: none; }
+.brand-sub { color: var(--muted); font-size: .95rem; padding-left: 14px; border-left: 1px solid var(--line); }
+.baby { background: var(--yellow); color: #3b2f0a; border-radius: 999px; padding: 8px 18px; font-size: .95rem; white-space: nowrap; }
+.baby b { font-weight: 800; margin-left: 6px; }
+
+/* hero */
+.hero .inner { display: grid; grid-template-columns: 1fr; gap: 8px; padding-block: 40px 28px; align-items: center; }
+@media (min-width: 760px) { .hero .inner { grid-template-columns: 1.05fr 1fr; padding-block: 64px 48px; } }
+.hero-copy { display: flex; flex-direction: column; gap: 16px; padding-inline: 4px; }
+.hero h1 { font-size: clamp(2.1rem, 6vw, 2.9rem); line-height: 1.2; }
+.hero-copy p.lead { color: var(--muted); font-size: 1.05rem; line-height: 1.8; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 54px; padding: 0 24px; border-radius: 12px; border: 1px solid transparent;
+  font-weight: 800; font-size: 1.05rem; text-decoration: none; align-self: flex-start;
+}
+.btn-green { background: var(--green); color: var(--green-ink); }
+.btn-green:hover { filter: brightness(.97); }
+.hero-art { max-width: 460px; width: 100%; justify-self: center; }
+.hero-art svg { width: 100%; height: auto; display: block; }
+
+/* recipes section */
+.recipes .inner { border-top: 1px solid var(--line); padding-block: 32px 40px; display: flex; flex-direction: column; gap: 20px; }
+.sec-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.sec-head h2 { font-size: 1.7rem; display: flex; align-items: baseline; gap: 12px; margin-top: 4px; }
+.sec-head h2 .count { font-weight: 400; font-size: 1.2rem; color: var(--green-deep); font-variant-numeric: tabular-nums; }
+.refresh { background: none; border: 0; color: var(--muted); font-size: .9rem; min-height: 40px; padding: 0 4px; }
+
+.tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+.search-box {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  flex: 1 1 320px; max-width: 520px; display: flex; align-items: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  min-height: 58px; padding: 0 8px 0 16px; gap: 10px;
+}
+.search-box:focus-within { border-color: var(--green-deep); box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 45%, transparent); }
+.search-box svg { width: 20px; height: 20px; flex: none; color: var(--muted); }
+.search-box input { flex: 1; min-width: 0; border: 0; background: none; font-size: 1.1rem; outline: none; min-height: 54px; }
+.search-box input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+.clear { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--line); font-size: 1.2rem; flex: none; }
+.filters { display: flex; gap: 8px; margin-left: auto; }
+.fbtn {
+  min-height: 58px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--surface); font-weight: 700; font-size: 1rem; white-space: nowrap;
+}
+.fbtn[aria-pressed="true"] { background: var(--yellow); border-color: var(--yellow); color: #3b2f0a; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { min-height: 42px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: .98rem; font-weight: 700; color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--green-ink); }
+#ingChips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+#ingChips::-webkit-scrollbar { display: none; }
+#ingChips > * { flex: none; }
+.chip-label { font-size: .88rem; color: var(--muted); align-self: center; margin-right: 2px; }
+.status { color: var(--muted); font-size: 1rem; }
+.notice { background: var(--note); border: 1px solid var(--note-line); border-radius: 12px; padding: 12px 16px; font-size: .98rem; }
+
+/* cards */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 22px; }
+.grid > .empty { grid-column: 1 / -1; }
+.card {
+  position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  overflow: hidden; display: flex; flex-direction: column; min-width: 0;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(80, 60, 30, .08); }
+.art { position: relative; aspect-ratio: 2 / 1; max-width: 100%; background: var(--c); display: grid; place-items: center; overflow: hidden; }
+.art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.art .book { width: 46%; max-width: 130px; height: auto; }
+.art .label {
+  position: absolute; left: 14px; top: 14px; background: var(--surface); color: var(--ink);
+  font-size: .78rem; font-weight: 700; letter-spacing: .06em; padding: 3px 10px; border-radius: 6px;
+}
+.art .label.ex { left: auto; right: 14px; top: auto; bottom: 12px; background: rgba(255,255,255,.8); color: #555; }
+.art .heart {
+  position: absolute; right: 12px; top: 12px; width: 42px; height: 42px; border-radius: 50%;
+  background: var(--surface); display: grid; place-items: center; color: var(--pink-deep);
+}
+.art .heart svg { width: 22px; height: 22px; }
+.c-green { --c: var(--green); --c2: var(--green-deep); }
+.c-blue { --c: var(--blue); --c2: var(--blue-deep); }
+.c-pink { --c: var(--pink); --c2: var(--pink-deep); }
+.c-yellow { --c: var(--yellow); --c2: var(--yellow-deep); }
+.card-body { padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.group { display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: .88rem; color: var(--muted); }
+.group-name { font-weight: 700; color: var(--green-deep); overflow-wrap: anywhere; min-width: 0; }
+.group-n { white-space: nowrap; }
+.card h3 { font-size: 1.3rem; line-height: 1.35; overflow-wrap: anywhere; }
+.open { all: unset; cursor: pointer; }
+.open::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: var(--r); }
+.open:focus-visible::after { outline: 3px solid var(--yellow-deep); outline-offset: -3px; }
+.ings { color: var(--muted); font-size: .98rem; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.card-foot { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: .95rem; }
+.card-foot a { position: relative; z-index: 2; text-decoration: none; color: var(--green-deep); font-weight: 700; min-height: 40px; display: inline-flex; align-items: center; }
+.card-foot a:hover { text-decoration: underline; }
+.card-foot .meta { color: var(--muted); font-size: .9rem; }
+mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1px; }
+.empty { text-align: center; padding: 40px 12px; color: var(--muted); display: grid; gap: 10px; justify-items: center; }
+.empty svg { width: 120px; height: auto; }
+.empty h3 { color: var(--ink); font-size: 1.35rem; }
+
+/* tip banner */
+.tip { background: var(--note); border: 1px solid var(--note-line); border-radius: var(--r); padding: 20px 24px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.tip svg { width: 34px; height: 34px; flex: none; color: var(--ink); }
+.tip-text { flex: 1 1 260px; min-width: 0; }
+.tip-text strong { display: block; font-weight: 800; font-size: 1.05rem; }
+.tip-text span { color: var(--muted); font-size: .95rem; }
+.tip a { font-size: .95rem; text-decoration: none; font-weight: 700; white-space: nowrap; }
+
+footer { border-top: 1px solid var(--line); text-align: center; padding-block: 28px 36px; color: var(--muted); font-size: .88rem; }
+footer .f-name { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; color: var(--ink); font-size: 1.05rem; }
+footer .f-name svg { width: 22px; height: 22px; }
+
+/* detail sheet */
+.scrim { position: fixed; inset: 0; background: rgba(40, 32, 20, .45); z-index: 20; }
+.sheet {
+  position: fixed; z-index: 21; left: 0; right: 0; bottom: 0; max-height: 92%;
+  overflow-y: auto; background: var(--bg); border-radius: 22px 22px 0 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+.sheet-inner { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.sheet .art { border-radius: 16px; aspect-ratio: 16 / 9; }
+.sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.sheet-top h2 { font-size: 1.85rem; line-height: 1.25; overflow-wrap: anywhere; margin-top: 4px; }
+.sheet-top .cat { display: inline-block; font-size: .85rem; font-weight: 700; padding: 2px 10px; border-radius: 6px; background: var(--green); color: var(--green-ink); margin-top: 6px; }
+.likes { font-size: .98rem; font-weight: 700; color: var(--pink-deep); margin-top: 4px; }
+.close { flex: none; width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 1.4rem; }
+.btn-yellow { background: var(--yellow); color: #3b2f0a; align-self: stretch; }
+.section-label { font-weight: 800; font-size: 1.15rem; color: var(--green-deep); margin: 0 0 8px; }
+.ing-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.ing-list li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px; }
+.steps { white-space: pre-wrap; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; overflow-wrap: anywhere; line-height: 1.8; }
+#dSibs .chip { color: var(--ink); text-align: left; min-height: 48px; }
+
+@media (max-width: 560px) {
+  .brand-sub { display: none; }
+  .filters { margin-left: 0; width: 100%; }
+  .fbtn { flex: 1; }
+  .search-box { max-width: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sheet { animation: up .22s ease-out; }
+  @keyframes up { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+  .hero-art .spark { animation: twinkle 3.2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+  .hero-art .spark.b { animation-delay: 1.4s; }
+  @keyframes twinkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.8); } }
+}
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="clover" viewBox="0 0 48 48">
+      <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M24 22c-6-1-10-5-9-10 1-4 6-5 9-1 3-4 8-3 9 1 1 5-3 9-9 10z"/>
+        <path d="M23 24c-1 6-5 10-10 9-4-1-5-6-1-9-4-3-3-8 1-9 5-1 9 3 10 9z"/>
+        <path d="M25 24c1 6 5 10 10 9 4-1 5-6 1-9 4-3 3-8-1-9-5-1-9 3-10 9z"/>
+        <path d="M24 26v14M20 42h8"/>
+      </g>
+    </symbol>
+    <symbol id="heart" viewBox="0 0 24 24">
+      <path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.5 4.5 7 4.5c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.5 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      <a class="brand-name" href="./" style="color:var(--green-deep)"><svg><use href="#clover"/></svg><span style="color:var(--ink)">세온 식탁</span></a>
+      <span class="brand-sub">할머니의 레시피 노트</span>
+    </div>
+    <div class="baby" id="baby" hidden>우리 아기<b id="babyAge"></b></div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="inner">
+    <div class="hero-copy">
+      <p class="eyebrow">작은 한 끼에, 커다란 사랑을</p>
+      <h1>오늘은 뭘 먹어볼까?</h1>
+      <p class="lead">찾아 둔 레시피를 한곳에 모아 두었어요.<br>할머니의 정성에, 찾는 수고는 조금 덜어 드릴게요.</p>
+      <a class="btn btn-green" href="#recipes" id="heroBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5 20 20" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        레시피 찾아보기
+      </a>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 440 330">
+        <!-- tray -->
+        <rect x="30" y="52" width="310" height="222" rx="38" fill="#8cc487"/>
+        <rect x="24" y="44" width="310" height="222" rx="38" fill="#a8d8a3"/>
+        <rect x="34" y="54" width="290" height="202" rx="30" fill="none" stroke="#c6e6c2" stroke-width="2"/>
+
+        <!-- compartments -->
+        <g fill="#fffdf6">
+          <rect x="46" y="66" width="82" height="70" rx="18"/>
+          <rect x="138" y="66" width="82" height="70" rx="18"/>
+          <rect x="230" y="66" width="82" height="70" rx="18"/>
+          <rect x="46" y="146" width="138" height="98" rx="22"/>
+          <rect x="194" y="146" width="118" height="98" rx="22"/>
+        </g>
+
+        <!-- side 1: broccoli -->
+        <g>
+          <path d="M70 118v-14M86 120v-16M102 116v-12" stroke="#8cc487" stroke-width="6" stroke-linecap="round"/>
+          <g fill="#7fb878"><circle cx="66" cy="98" r="9"/><circle cx="76" cy="92" r="9"/><circle cx="84" cy="98" r="10"/><circle cx="92" cy="92" r="9"/><circle cx="100" cy="98" r="9"/><circle cx="108" cy="94" r="8"/></g>
+          <g fill="#a8d8a3"><circle cx="74" cy="90" r="3.5"/><circle cx="90" cy="90" r="3.5"/><circle cx="106" cy="92" r="3"/></g>
+        </g>
+
+        <!-- side 2: rolled omelette -->
+        <g>
+          <rect x="148" y="84" width="30" height="36" rx="9" fill="#ffd966" stroke="#e2b740" stroke-width="2"/>
+          <rect x="180" y="84" width="30" height="36" rx="9" fill="#ffd966" stroke="#e2b740" stroke-width="2"/>
+          <path d="M163 96c-6 0-6 12 0 12 8 0 8-16-1-16" fill="none" stroke="#e2b740" stroke-width="2" stroke-linecap="round"/>
+          <path d="M195 96c-6 0-6 12 0 12 8 0 8-16-1-16" fill="none" stroke="#e2b740" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="156" cy="112" r="2" fill="#7fb878"/><circle cx="202" cy="90" r="2" fill="#ffb4a6"/>
+        </g>
+
+        <!-- side 3: patties with carrot -->
+        <g>
+          <ellipse cx="258" cy="104" rx="17" ry="14" fill="#e9b48a"/>
+          <ellipse cx="256" cy="101" rx="15" ry="11" fill="#f4c9a0"/>
+          <ellipse cx="288" cy="108" rx="16" ry="13" fill="#e9b48a"/>
+          <ellipse cx="286" cy="105" rx="14" ry="10" fill="#f4c9a0"/>
+          <g fill="#ff9b85"><rect x="250" y="97" width="4" height="4" rx="1"/><rect x="262" y="104" width="4" height="4" rx="1"/><rect x="282" y="101" width="4" height="4" rx="1"/></g>
+          <g fill="#7fb878"><rect x="257" y="95" width="3" height="3" rx="1"/><rect x="291" y="107" width="3" height="3" rx="1"/></g>
+        </g>
+
+        <!-- rice: fills its square compartment -->
+        <g>
+          <rect x="54" y="156" width="122" height="80" rx="16" fill="#f1e9d8"/>
+          <rect x="54" y="154" width="122" height="78" rx="16" fill="#ffffff" stroke="#ece3cf" stroke-width="2"/>
+          <path d="M60 166q55 -12 110 0" stroke="#f4eee2" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <g fill="#ece3cf">
+            <ellipse cx="72" cy="176" rx="3" ry="1.6" transform="rotate(-20 72 176)"/>
+            <ellipse cx="158" cy="174" rx="3" ry="1.6" transform="rotate(25 158 174)"/>
+            <ellipse cx="114" cy="168" rx="3" ry="1.6"/>
+            <ellipse cx="70" cy="220" rx="3" ry="1.6" transform="rotate(15 70 220)"/>
+            <ellipse cx="160" cy="220" rx="3" ry="1.6" transform="rotate(-15 160 220)"/>
+            <ellipse cx="96" cy="224" rx="3" ry="1.6" transform="rotate(30 96 224)"/>
+            <ellipse cx="136" cy="226" rx="3" ry="1.6" transform="rotate(-30 136 226)"/>
+          </g>
+          <circle cx="101" cy="196" r="3.2" fill="#2f3a2c"/>
+          <circle cx="129" cy="196" r="3.2" fill="#2f3a2c"/>
+          <path d="M108 201q7 7 14 0" stroke="#2f3a2c" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <ellipse cx="91" cy="206" rx="6" ry="3.4" fill="#ffb4a6" opacity=".7"/>
+          <ellipse cx="139" cy="206" rx="6" ry="3.4" fill="#ffb4a6" opacity=".7"/>
+        </g>
+
+        <!-- soup: fills its square compartment -->
+        <g>
+          <rect x="202" y="154" width="102" height="82" rx="16" fill="#f3e3c0"/>
+          <rect x="206" y="158" width="94" height="74" rx="13" fill="#f8ebcd"/>
+          <path d="M214 180c6-8 12 4 18-4s12 4 18-2s12 4 18-2M218 212c6-6 12 4 18-2s12 4 18-2s10 4 16-1" stroke="#5e8b57" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <rect x="262" y="188" width="12" height="12" rx="2" fill="#ffffff" stroke="#ece3cf"/>
+          <rect x="232" y="192" width="11" height="11" rx="2" fill="#ffffff" stroke="#ece3cf"/>
+          <rect x="282" y="168" width="9" height="9" rx="2" fill="#ffffff" stroke="#ece3cf"/>
+        </g>
+
+        <!-- baby spoon & fork: same flat style as the tray (light fill + offset shadow + soft highlight) -->
+        <g transform="translate(372 120)">
+          <g fill="#e2b740" transform="translate(3 3)">
+            <ellipse cx="0" cy="18" rx="14" ry="19"/>
+            <rect x="-7" y="30" width="14" height="74" rx="7"/>
+            <circle cx="0" cy="104" r="9"/>
+          </g>
+          <g fill="#ffd966">
+            <ellipse cx="0" cy="18" rx="14" ry="19"/>
+            <rect x="-7" y="30" width="14" height="74" rx="7"/>
+            <circle cx="0" cy="104" r="9"/>
+          </g>
+          <path d="M-6 8q-2 8 0 16M-2 46v40" stroke="#fff3c4" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/>
+        </g>
+        <g transform="translate(408 120)">
+          <g fill="#e2b740" transform="translate(3 3)">
+            <path d="M-13 4a3.5 3.5 0 0 1 7 0v12h2.5V4a3.5 3.5 0 0 1 7 0v12H6V4a3.5 3.5 0 0 1 7 0v14q0 14-13 16q-13-2-13-16z"/>
+            <rect x="-7" y="30" width="14" height="74" rx="7"/>
+            <circle cx="0" cy="104" r="9"/>
+          </g>
+          <g fill="#ffd966">
+            <path d="M-13 4a3.5 3.5 0 0 1 7 0v12h2.5V4a3.5 3.5 0 0 1 7 0v12H6V4a3.5 3.5 0 0 1 7 0v14q0 14-13 16q-13-2-13-16z"/>
+            <rect x="-7" y="30" width="14" height="74" rx="7"/>
+            <circle cx="0" cy="104" r="9"/>
+          </g>
+          <path d="M-9.5 4v14M-2 46v40" stroke="#fff3c4" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/>
+        </g>
+
+        <!-- sparkles around the tray -->
+        <path class="spark" d="M20 22c1.8 10 4.6 12.8 14.6 14.6-10 1.8-12.8 4.6-14.6 14.6-1.8-10-4.6-12.8-14.6-14.6 10-1.8 12.8-4.6 14.6-14.6z" fill="#e2b740"/>
+        <path class="spark b" d="M362 26c1.4 8 4 10.6 12 12-8 1.4-10.6 4-12 12-1.4-8-4-10.6-12-12 8-1.4 10.6-4 12-12z" fill="none" stroke="#e2b740" stroke-width="2.2" stroke-linejoin="round"/>
+        <path class="spark b" d="M14 252c1.2 7 3.5 9.3 10.5 10.5-7 1.2-9.3 3.5-10.5 10.5-1.2-7-3.5-9.3-10.5-10.5 7-1.2 9.3-3.5 10.5-10.5z" fill="none" stroke="#e2b740" stroke-width="2" stroke-linejoin="round"/>
+        <path class="spark" d="M352 262c1.4 8 4 10.6 12 12-8 1.4-10.6 4-12 12-1.4-8-4-10.6-12-12 8-1.4 10.6-4 12-12z" fill="#e2b740"/>
+        <circle cx="176" cy="28" r="4" fill="#ffb4a6"/>
+        <circle cx="412" cy="84" r="3.5" fill="#a9cff5"/>
+        <circle cx="6" cy="150" r="3" fill="#a8d8a3"/>
+
+        <!-- caption on curve -->
+        <path id="arc" d="M70 300 Q180 326 300 296" fill="none"/>
+        <text font-family="Nanum Gothic, sans-serif" font-size="15" fill="#6d7266"><textPath href="#arc" startOffset="14%">골고루, 맛있게 자라요</textPath></text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="recipes" id="recipes">
+  <div class="inner">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">우리 집 작은 레시피북</p>
+        <h2>차곡차곡 모은 레시피 <span class="count" id="count"></span></h2>
+      </div>
+      <button class="refresh" id="refresh" type="button">↻ 새로 불러오기</button>
+    </div>
+
+    <div class="tools">
+      <div class="search-box" role="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="q" type="search" placeholder="음식 이름이나 재료를 찾아보세요" autocomplete="off" aria-label="레시피 찾기">
+        <button class="clear" id="clear" type="button" aria-label="검색어 지우기" hidden>×</button>
+      </div>
+      <div class="filters">
+        <button class="fbtn" id="fAll" type="button" aria-pressed="true">전체 보기</button>
+        <button class="fbtn" id="fFav" type="button" aria-pressed="false">♡ 잘 먹은 것</button>
+      </div>
+    </div>
+    <div class="chips" id="cats" aria-label="종류"></div>
+    <div class="chips" id="ingChips" aria-label="자주 쓰는 재료"></div>
+
+    <div id="notice" class="notice" hidden></div>
+    <div class="status" id="status" aria-live="polite">레시피를 불러오는 중이에요…</div>
+    <div class="grid" id="list"></div>
+
+    <div class="tip">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 26l2-7L21 6l5 5L13 24z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M18 9l5 5M6 26l7-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <div class="tip-text">
+        <strong>할머니만의 비법도 적어 두세요</strong>
+        <span>구글 시트에 레시피를 한 줄 더하면, 다음에 열 때 여기에 나타나요.</span>
+      </div>
+      <a id="sheetLink" href="#" target="_blank" rel="noopener" hidden>레시피 시트 열기 ↗</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-name" style="color:var(--green-deep)"><svg><use href="#clover"/></svg><span style="color:var(--ink)">세온 식탁</span></div>
+  <p>사랑을 담아 만드는, 우리 아기의 한 끼</p>
+</footer>
+
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet" id="detail" hidden role="dialog" aria-modal="true" aria-labelledby="dTitle">
+  <div class="sheet-inner">
+    <div class="art" id="dArt"></div>
+    <div class="sheet-top">
+      <div style="min-width:0">
+        <div id="dGroup"></div>
+        <span class="cat" id="dCat"></span>
+        <h2 id="dTitle"></h2>
+        <div class="likes" id="dLikes" hidden>♥ 아기가 잘 먹었어요</div>
+      </div>
+      <button class="close" id="dClose" type="button" aria-label="닫기">×</button>
+    </div>
+    <a class="btn btn-yellow" id="dLink" href="#" target="_blank" rel="noopener">인스타그램에서 영상 보기 ↗</a>
+    <div>
+      <p class="section-label">재료</p>
+      <ul class="ing-list" id="dIngs"></ul>
+    </div>
+    <div id="dStepsWrap">
+      <p class="section-label">만드는 법 · 메모</p>
+      <div class="steps" id="dSteps"></div>
+    </div>
+    <div id="dSibWrap" hidden>
+      <p class="section-label" id="dSibLabel"></p>
+      <div class="chips" id="dSibs"></div>
+    </div>
+  </div>
+</section>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  const CFG = window.RECIPE_BOX || {};
+  const ORDER = ["밥·죽", "국·찌개", "반찬", "면", "간식", "기타"];
+  const COLORS = ["c-green", "c-blue", "c-pink", "c-yellow"];
+  const SAMPLE = [
+    { title: "두부 채소 동그랑땡", category: "반찬", ingredients: ["두부 반 모", "당근", "애호박", "양파", "계란 1개", "부침가루 2숟가락"], steps: "1. 두부는 면포로 물기를 꼭 짠다\n2. 채소는 잘게 다진다\n3. 모두 섞어 동그랗게 빚는다\n4. 약불에서 앞뒤로 노릇하게 굽는다", url: "", kidLikes: true },
+    { title: "소고기 미역국", category: "국·찌개", ingredients: ["소고기 양지 100g", "마른 미역 한 줌", "참기름", "국간장 조금"], steps: "1. 미역을 불려 먹기 좋게 자른다\n2. 참기름에 소고기와 미역을 볶는다\n3. 물을 붓고 20분 끓인다\n4. 국간장으로 아주 약하게 간한다", url: "", kidLikes: false },
+    { title: "계란 치즈 주먹밥", category: "밥·죽", ingredients: ["밥 한 공기", "계란 1개", "아기 치즈 1장", "김가루"], steps: "1. 계란을 스크램블한다\n2. 밥에 계란, 잘게 찢은 치즈, 김가루를 섞는다\n3. 한입 크기로 뭉친다", url: "", kidLikes: true },
+  ];
+  const CACHE_KEY = "seon-table-cache-v1";
+  const $ = (id) => document.getElementById(id);
+  const state = { recipes: [], loaded: false, example: false, q: "", cat: "", ing: "", fav: false, openIdx: -1 };
+
+  // ---------- helpers ----------
+  const norm = (s) => (s || "").toString().toLowerCase().replace(/\s+/g, "");
+  const splitIngs = (t) => (t || "").split(/[,\n、·]/).map((s) => s.trim()).filter(Boolean);
+  const esc = (s) => (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  function highlight(text, terms) {
+    let out = esc(text);
+    terms.forEach((t) => {
+      if (!t) return;
+      const re = new RegExp(esc(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+      out = out.replace(re, (m) => "<mark>" + m + "</mark>");
+    });
+    return out;
+  }
+  function safeUrl(u) { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : ""; } catch (e) { return ""; } }
+  function photoUrl(u) {
+    const s = (u || "").trim();
+    const m = s.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)/);
+    if (m) return "https://drive.google.com/thumbnail?id=" + m[1] + "&sz=w1000";
+    return safeUrl(s);
+  }
+  const BOOK =
+    '<svg class="book" viewBox="0 0 120 110" aria-hidden="true">' +
+    '<g transform="rotate(-9 60 55)">' +
+    '<rect x="36" y="22" width="66" height="84" rx="8" style="fill:var(--c2);opacity:.35"/>' +
+    '<rect x="30" y="16" width="66" height="84" rx="8" style="fill:var(--paper)"/>' +
+    '<rect x="26" y="16" width="9" height="84" rx="3" style="fill:var(--c2)"/>' +
+    '<use href="#clover" x="50" y="36" width="30" height="30" style="color:var(--c2)"/>' +
+    '<path d="M44 82h40" stroke-width="1.6" stroke-linecap="round" style="stroke:var(--c2);opacity:.5"/>' +
+    "</g></svg>";
+  function artHTML(r, forCard) {
+    const img = r.photo
+      ? '<img src="' + esc(r.photo) + '" alt="' + esc(r.title) + ' 사진" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">'
+      : "";
+    if (!forCard) return BOOK + img;
+    return BOOK + img +
+      '<span class="label">' + esc(r.category) + "</span>" +
+      (state.example ? '<span class="label ex">예시</span>' : "") +
+      (r.kidLikes ? '<span class="heart" title="아기가 잘 먹었어요"><svg><use href="#heart"/></svg></span>' : "");
+  }
+  const colorOf = (i) => COLORS[i % COLORS.length];
+
+  // ---------- baby age ----------
+  (function () {
+    const m = String(CFG.babyBirth || "").match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
+    if (!m) return;
+    const now = new Date();
+    let months = (now.getFullYear() - +m[1]) * 12 + (now.getMonth() + 1 - +m[2]);
+    if (m[3] && now.getDate() < +m[3]) months -= 1;
+    if (months < 0 || months > 120) return;
+    $("babyAge").textContent = months + "개월";
+    $("baby").hidden = false;
+  })();
+
+  // ---------- Google Sheet → CSV ----------
+  function csvUrl(raw) {
+    const s = (raw || "").trim();
+    if (!s) return "";
+    let m = s.match(/docs\.google\.com\/spreadsheets\/d\/e\/([^/]+)/);
+    if (m) {
+      const gid = (s.match(/[?&#]gid=(\d+)/) || [])[1];
+      return "https://docs.google.com/spreadsheets/d/e/" + m[1] + "/pub?output=csv" + (gid ? "&gid=" + gid : "");
+    }
+    m = s.match(/docs\.google\.com\/spreadsheets\/d\/([^/]+)/);
+    if (m) {
+      const gid = (s.match(/[?&#]gid=(\d+)/) || [])[1] || "0";
+      return "https://docs.google.com/spreadsheets/d/" + m[1] + "/gviz/tq?tqx=out:csv&gid=" + gid;
+    }
+    return s;
+  }
+  function parseCSV(text) {
+    const rows = []; let row = []; let cell = ""; let q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+        else cell += c;
+      } else if (c === '"') q = true;
+      else if (c === ",") { row.push(cell); cell = ""; }
+      else if (c === "\n" || c === "\r") {
+        if (c === "\r" && text[i + 1] === "\n") i++;
+        row.push(cell); rows.push(row); row = []; cell = "";
+      } else cell += c;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    return rows;
+  }
+  const COLS = {
+    group: /묶음|게시물|시리즈/,
+    title: /요리|이름|제목/,
+    category: /종류|분류|카테고리/,
+    ingredients: /재료/,
+    steps: /만드는|방법|메모|레시피/,
+    photo: /사진|이미지|photo|image/i,
+    url: /링크|인스타|url|주소/i,
+    kidLikes: /잘\s*먹|좋아|⭐|별/,
+  };
+  function rowsToRecipes(rows) {
+    if (!rows.length) return [];
+    const head = rows[0].map((h) => h.trim());
+    const idx = {};
+    Object.keys(COLS).forEach((k) => {
+      idx[k] = head.findIndex((h, i) => COLS[k].test(h) && !Object.values(idx).includes(i));
+    });
+    if (idx.title < 0) throw new Error("no-title");
+    const get = (r, k) => (idx[k] >= 0 ? (r[idx[k]] || "").trim() : "");
+    const list = rows.slice(1).map((r) => {
+      const like = get(r, "kidLikes");
+      return {
+        title: get(r, "title"),
+        category: get(r, "category") || "기타",
+        ingredients: splitIngs(get(r, "ingredients")),
+        steps: get(r, "steps"),
+        url: safeUrl(get(r, "url")),
+        photo: photoUrl(get(r, "photo")),
+        kidLikes: !!like && !/^(x|n|no|아니|false|0|-)$/i.test(like),
+        group: get(r, "group"),
+      };
+    }).filter((r) => r.title);
+    const seen = {};
+    list.forEach((r) => { if (r.group) { seen[r.group] = (seen[r.group] || 0) + 1; r.groupPos = seen[r.group]; } });
+    list.forEach((r) => { if (r.group) r.groupSize = seen[r.group]; });
+    return list;
+  }
+
+  // ---------- filtering ----------
+  function matches(r, terms) {
+    const hay = norm([r.title, r.ingredients.join(" "), r.steps, r.category, r.group || ""].join(" "));
+    return terms.every((t) => hay.includes(norm(t)));
+  }
+  function filtered() {
+    const terms = state.q.trim().split(/\s+/).filter(Boolean);
+    return state.recipes
+      .map((r, i) => Object.assign({ _i: i }, r))
+      .filter((r) => !state.cat || r.category === state.cat)
+      .filter((r) => !state.ing || r.ingredients.some((i) => norm(i).includes(norm(state.ing))))
+      .filter((r) => !state.fav || r.kidLikes)
+      .filter((r) => matches(r, terms))
+      .map((r) => {
+        const g = r.group ? state.recipes.filter((x) => x.group === r.group) : null;
+        r._like = g ? g.some((x) => x.kidLikes) : r.kidLikes;
+        r._at = g ? state.recipes.lastIndexOf(g[g.length - 1]) : r._i;
+        return r;
+      })
+      .sort((a, b) => (b._like ? 1 : 0) - (a._like ? 1 : 0) || b._at - a._at || (a.groupPos || 0) - (b.groupPos || 0));
+  }
+  const filtering = () => !!(state.q.trim() || state.cat || state.ing || state.fav);
+
+  // ---------- render ----------
+  function chip(label, pressed, onClick) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = label;
+    b.setAttribute("aria-pressed", String(pressed)); b.onclick = onClick;
+    return b;
+  }
+  function renderChips() {
+    const present = Array.from(new Set(state.recipes.map((r) => r.category)));
+    const cats = ORDER.filter((c) => present.includes(c)).concat(present.filter((c) => !ORDER.includes(c)));
+    const box = $("cats"); box.innerHTML = "";
+    if (cats.length > 1) cats.forEach((c) => box.appendChild(chip(c, state.cat === c, () => { state.cat = state.cat === c ? "" : c; render(); })));
+    const counts = {};
+    state.recipes.forEach((r) => r.ingredients.forEach((i) => {
+      const k = i.replace(/\s*[\d½¼]+.*$/, "").replace(/\s*(조금|약간|한\s*\S+|반\s*\S+)$/, "").trim();
+      if (k) counts[k] = (counts[k] || 0) + 1;
+    }));
+    const top = Object.entries(counts).filter((e) => e[1] > 1 || state.recipes.length < 6).sort((a, b) => b[1] - a[1]).slice(0, 10).map((e) => e[0]);
+    const ib = $("ingChips"); ib.innerHTML = "";
+    if (top.length) { const l = document.createElement("span"); l.className = "chip-label"; l.textContent = "자주 쓰는 재료"; ib.appendChild(l); }
+    top.forEach((i) => ib.appendChild(chip(i, state.ing === i, () => { state.ing = state.ing === i ? "" : i; render(); })));
+    $("fAll").setAttribute("aria-pressed", String(!filtering()));
+    $("fFav").setAttribute("aria-pressed", String(state.fav));
+  }
+  function groupLabel(r) { return r.groupSize > 1 ? r.groupSize + "개 중 " + r.groupPos + "번째" : ""; }
+  function groupHTML(r, terms) {
+    if (!r.group) return "";
+    const n = groupLabel(r);
+    return '<div class="group"><span class="group-name">' + highlight(r.group, terms) + "</span>" + (n ? '<span class="group-n">' + n + "</span>" : "") + "</div>";
+  }
+  const EMPTY_ART = '<div class="c-green" style="width:120px">' + BOOK.replace('class="book"', 'style="width:100%"') + "</div>";
+  function render() {
+    renderChips();
+    $("clear").hidden = !state.q;
+    if (!state.loaded) return;
+    const list = $("list"), status = $("status");
+    $("count").textContent = state.recipes.length || "";
+    const rows = filtered();
+    const terms = state.q.trim().split(/\s+/).filter(Boolean).concat(state.ing ? [state.ing] : []);
+    list.innerHTML = "";
+    if (!state.recipes.length) {
+      status.textContent = "";
+      list.innerHTML = '<div class="empty">' + EMPTY_ART + '<h3>아직 모아 둔 레시피가 없어요</h3><p>구글 시트에 레시피를 적으면 여기에 나타나요.</p></div>';
+      return;
+    }
+    status.textContent = filtering() ? "찾은 레시피 " + rows.length + "개" : "";
+    status.hidden = !filtering();
+    if (!rows.length) {
+      list.innerHTML = '<div class="empty">' + EMPTY_ART + '<h3>맞는 레시피가 없어요</h3><p>재료 이름을 짧게 적어 보세요. (예: ‘애호박’ 대신 ‘호박’)</p></div>';
+      return;
+    }
+    rows.forEach((r) => {
+      const a = document.createElement("article");
+      a.className = "card " + colorOf(r._i);
+      a.innerHTML =
+        '<div class="art">' + artHTML(r, true) + "</div>" +
+        '<div class="card-body">' + groupHTML(r, terms) +
+        '<h3><button class="open" type="button">' + highlight(r.title, terms) + "</button></h3>" +
+        (r.ingredients.length ? '<p class="ings">' + highlight(r.ingredients.join(", "), terms) + "</p>" : '<p class="ings">재료는 아직 적지 않았어요.</p>') +
+        '<div class="card-foot">' +
+        (r.url ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">인스타에서 보기 ↗</a>' : '<span class="meta">자세히 보기 →</span>') +
+        '<span class="meta">' + (r.ingredients.length ? "재료 " + r.ingredients.length + "가지" : "") + "</span>" +
+        "</div></div>";
+      a.querySelector(".open").onclick = () => openDetail(r._i);
+      list.appendChild(a);
+    });
+  }
+
+  // ---------- detail sheet ----------
+  let lastFocus = null;
+  function openDetail(i) {
+    const r = state.recipes[i]; if (!r) return;
+    if ($("detail").hidden) lastFocus = document.activeElement;
+    state.openIdx = i;
+    const art = $("dArt");
+    art.className = "art " + colorOf(i);
+    art.innerHTML = artHTML(r, false);
+    $("dGroup").innerHTML = groupHTML(r, []);
+    $("dCat").textContent = r.category;
+    $("dTitle").textContent = r.title;
+    $("dLikes").hidden = !r.kidLikes;
+    const link = $("dLink");
+    link.hidden = !r.url; if (r.url) link.href = r.url;
+    $("dIngs").innerHTML = r.ingredients.map((x) => "<li>" + esc(x) + "</li>").join("") || "<li>적어 둔 재료가 없어요</li>";
+    $("dStepsWrap").hidden = !r.steps;
+    $("dSteps").textContent = r.steps;
+    const sib = r.group ? state.recipes.map((x, j) => ({ x, j })).filter((o) => o.x.group === r.group && o.j !== i) : [];
+    $("dSibWrap").hidden = !sib.length;
+    $("dSibLabel").textContent = "‘" + r.group + "’의 다른 레시피";
+    const sb = $("dSibs"); sb.innerHTML = "";
+    sib.sort((a, b) => (a.x.groupPos || 0) - (b.x.groupPos || 0)).forEach((o) => sb.appendChild(chip(o.x.groupPos + ". " + o.x.title, false, () => openDetail(o.j))));
+    $("detail").hidden = false; $("scrim").hidden = false;
+    $("detail").scrollTop = 0;
+    document.body.style.overflow = "hidden";
+    $("dClose").focus();
+  }
+  function closeDetail() {
+    $("detail").hidden = true; $("scrim").hidden = true;
+    document.body.style.overflow = ""; state.openIdx = -1;
+    lastFocus && lastFocus.focus && lastFocus.focus();
+  }
+  $("dClose").onclick = closeDetail;
+  $("scrim").onclick = closeDetail;
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("detail").hidden) closeDetail(); });
+
+  // ---------- search & filters ----------
+  let qTimer;
+  $("q").addEventListener("input", (e) => { clearTimeout(qTimer); qTimer = setTimeout(() => { state.q = e.target.value; render(); }, 120); });
+  $("clear").onclick = () => { $("q").value = ""; state.q = ""; render(); $("q").focus(); };
+  $("fAll").onclick = () => { state.q = ""; $("q").value = ""; state.cat = ""; state.ing = ""; state.fav = false; render(); };
+  $("fFav").onclick = () => { state.fav = !state.fav; render(); };
+  $("heroBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    $("recipes").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    setTimeout(() => $("q").focus({ preventScroll: true }), 350);
+  });
+
+  // ---------- load ----------
+  function notice(msg) { $("notice").textContent = msg || ""; $("notice").hidden = !msg; }
+  function readCache() { try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); } catch (e) { return null; } }
+  function writeCache(recipes) { try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), recipes })); } catch (e) {} }
+
+  async function load() {
+    const raw = CFG.sheetUrl || "";
+    const src = csvUrl(raw);
+    $("refresh").hidden = !src;
+    if (/docs\.google\.com/.test(raw)) { $("sheetLink").href = raw; $("sheetLink").hidden = false; }
+    if (!src) {
+      state.recipes = SAMPLE; state.example = true; state.loaded = true;
+      notice("아직 구글 시트가 연결되지 않아 예시 레시피를 보여 드리고 있어요. config.js에 시트 주소를 넣어 주세요.");
+      render(); return;
+    }
+    const cached = readCache();
+    if (cached && cached.recipes && !state.loaded) { state.recipes = cached.recipes; state.loaded = true; render(); }
+    $("status").hidden = false;
+    $("status").textContent = "레시피를 불러오는 중이에요…";
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
+    try {
+      const res = await fetch(src + (src.includes("?") ? "&" : "?") + "_=" + Date.now(), { signal: ctrl.signal, cache: "no-store" });
+      if (!res.ok) throw new Error("http " + res.status);
+      const text = await res.text();
+      if (/^\s*</.test(text)) throw new Error("not-csv");
+      const recipes = rowsToRecipes(parseCSV(text));
+      state.recipes = recipes; state.example = false; state.loaded = true;
+      writeCache(recipes); notice("");
+    } catch (e) {
+      state.loaded = true;
+      if (e && e.message === "no-title") notice("시트 첫 줄에 ‘요리 이름’ 칸이 없어요. 첫 줄 제목을 확인해 주세요.");
+      else if (cached) notice("새 레시피를 불러오지 못해 지난번에 불러온 내용을 보여 드려요. 인터넷 연결을 확인해 주세요.");
+      else notice("레시피를 불러오지 못했어요. 인터넷 연결을 확인하거나, 시트가 ‘링크가 있는 모든 사용자’에게 공개되어 있는지 확인해 주세요.");
+    } finally { clearTimeout(timer); }
+    render();
+  }
+  $("refresh").onclick = load;
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && state.loaded) load(); });
+  load();
+})();
+</script>
+</body>
+</html>
