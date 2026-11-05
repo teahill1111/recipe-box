@@ -207,6 +207,7 @@ footer .f-name svg { width: 22px; height: 22px; }
 .section-label { font-weight: 800; font-size: 1.15rem; color: var(--green-deep); margin: 0 0 8px; }
 .ing-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .ing-list li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px; }
+.steps.memo { background: var(--note); border-color: var(--note-line); }
 .steps { white-space: pre-wrap; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; overflow-wrap: anywhere; line-height: 1.8; }
 #dSibs .chip { color: var(--ink); text-align: left; min-height: 48px; }
 
@@ -445,8 +446,12 @@ footer .f-name svg { width: 22px; height: 22px; }
       <p class="section-label">재료</p>
       <ul class="ing-list" id="dIngs"></ul>
     </div>
+    <div id="dMemoWrap" hidden>
+      <p class="section-label">할머니 메모</p>
+      <div class="steps memo" id="dMemo"></div>
+    </div>
     <div id="dStepsWrap">
-      <p class="section-label">만드는 법 · 메모</p>
+      <p class="section-label">만드는 법</p>
       <div class="steps" id="dSteps"></div>
     </div>
     <div id="dSibWrap" hidden>
@@ -467,7 +472,7 @@ footer .f-name svg { width: 22px; height: 22px; }
     { title: "소고기 미역국", category: "국·찌개", ingredients: ["소고기 양지 100g", "마른 미역 한 줌", "참기름", "국간장 조금"], steps: "1. 미역을 불려 먹기 좋게 자른다\n2. 참기름에 소고기와 미역을 볶는다\n3. 물을 붓고 20분 끓인다\n4. 국간장으로 아주 약하게 간한다", url: "", kidLikes: false },
     { title: "계란 치즈 주먹밥", category: "밥·죽", ingredients: ["밥 한 공기", "계란 1개", "아기 치즈 1장", "김가루"], steps: "1. 계란을 스크램블한다\n2. 밥에 계란, 잘게 찢은 치즈, 김가루를 섞는다\n3. 한입 크기로 뭉친다", url: "", kidLikes: true },
   ];
-  const CACHE_KEY = "seon-table-cache-v1";
+  const CACHE_KEY = "seon-table-cache-v2";
   const $ = (id) => document.getElementById(id);
   const state = { recipes: [], loaded: false, example: false, q: "", cat: "", ing: "", fav: false, openIdx: -1 };
 
@@ -557,12 +562,18 @@ footer .f-name svg { width: 22px; height: 22px; }
     if (cell || row.length) { row.push(cell); rows.push(row); }
     return rows;
   }
+  // 시트 첫 줄 제목으로 칸을 찾습니다 (위에서부터 먼저 짝지어짐)
   const COLS = {
+    id: /^\s*(레시피\s*)?id\s*$/i,
+    visible: /공개/,
     group: /묶음|게시물|시리즈/,
     title: /요리|이름|제목/,
     category: /종류|분류|카테고리/,
+    mainIng: /주\s*재료/,
     ingredients: /재료/,
-    steps: /만드는|방법|메모|레시피/,
+    memo: /메모|비법/,
+    steps: /만드는|방법|레시피/,
+    time: /시간/,
     photo: /사진|이미지|photo|image/i,
     url: /링크|인스타|url|주소/i,
     kidLikes: /잘\s*먹|좋아|⭐|별/,
@@ -576,13 +587,22 @@ footer .f-name svg { width: 22px; height: 22px; }
     });
     if (idx.title < 0) throw new Error("no-title");
     const get = (r, k) => (idx[k] >= 0 ? (r[idx[k]] || "").trim() : "");
-    const list = rows.slice(1).map((r) => {
+    const isHidden = (r) => /비공개|숨김/.test(get(r, "visible"));
+    state.hiddenCount = rows.slice(1).filter((r) => get(r, "title") && isHidden(r)).length;
+    const list = rows.slice(1).filter((r) => !isHidden(r)).map((r) => {
       const like = get(r, "kidLikes");
+      const amounts = splitIngs(get(r, "ingredients"));
+      const main = splitIngs(get(r, "mainIng"));
+      const cat = get(r, "category");
+      const t = get(r, "time").replace(/[^\d~\-]/g, "");
       return {
         title: get(r, "title"),
-        category: get(r, "category") || "기타",
-        ingredients: splitIngs(get(r, "ingredients")),
+        category: !cat || cat === "미분류" ? "기타" : cat,
+        ingredients: main.length ? main : amounts,
+        amounts: amounts.length ? amounts : main,
         steps: get(r, "steps"),
+        memo: get(r, "memo"),
+        time: t ? t + "분" : "",
         url: safeUrl(get(r, "url")),
         photo: photoUrl(get(r, "photo")),
         kidLikes: !!like && !/^(x|n|no|아니|false|0|-)$/i.test(like),
@@ -597,7 +617,7 @@ footer .f-name svg { width: 22px; height: 22px; }
 
   // ---------- filtering ----------
   function matches(r, terms) {
-    const hay = norm([r.title, r.ingredients.join(" "), r.steps, r.category, r.group || ""].join(" "));
+    const hay = norm([r.title, r.ingredients.join(" "), (r.amounts || []).join(" "), r.steps, r.memo || "", r.category, r.group || ""].join(" "));
     return terms.every((t) => hay.includes(norm(t)));
   }
   function filtered() {
@@ -660,7 +680,7 @@ footer .f-name svg { width: 22px; height: 22px; }
     list.innerHTML = "";
     if (!state.recipes.length) {
       status.textContent = "";
-      list.innerHTML = '<div class="empty">' + EMPTY_ART + '<h3>아직 모아 둔 레시피가 없어요</h3><p>구글 시트에 레시피를 적으면 여기에 나타나요.</p></div>';
+      list.innerHTML = '<div class="empty">' + EMPTY_ART + '<h3>아직 모아 둔 레시피가 없어요</h3><p>' + (state.hiddenCount ? "시트에 레시피 " + state.hiddenCount + "개가 ‘비공개’로 되어 있어요. ‘공개 여부’를 ‘공개’로 바꾸면 여기에 나타나요." : "구글 시트에 레시피를 적으면 여기에 나타나요.") + '</p></div>';
       return;
     }
     status.textContent = filtering() ? "찾은 레시피 " + rows.length + "개" : "";
@@ -679,7 +699,7 @@ footer .f-name svg { width: 22px; height: 22px; }
         (r.ingredients.length ? '<p class="ings">' + highlight(r.ingredients.join(", "), terms) + "</p>" : '<p class="ings">재료는 아직 적지 않았어요.</p>') +
         '<div class="card-foot">' +
         (r.url ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">인스타에서 보기 ↗</a>' : '<span class="meta">자세히 보기 →</span>') +
-        '<span class="meta">' + (r.ingredients.length ? "재료 " + r.ingredients.length + "가지" : "") + "</span>" +
+        '<span class="meta">' + [r.time ? "⏱ " + r.time : "", r.ingredients.length ? "재료 " + r.ingredients.length + "가지" : ""].filter(Boolean).join(" · ") + "</span>" +
         "</div></div>";
       a.querySelector(".open").onclick = () => openDetail(r._i);
       list.appendChild(a);
@@ -696,12 +716,14 @@ footer .f-name svg { width: 22px; height: 22px; }
     art.className = "art " + colorOf(i);
     art.innerHTML = artHTML(r, false);
     $("dGroup").innerHTML = groupHTML(r, []);
-    $("dCat").textContent = r.category;
+    $("dCat").textContent = r.category + (r.time ? " · ⏱ " + r.time : "");
     $("dTitle").textContent = r.title;
     $("dLikes").hidden = !r.kidLikes;
     const link = $("dLink");
     link.hidden = !r.url; if (r.url) link.href = r.url;
-    $("dIngs").innerHTML = r.ingredients.map((x) => "<li>" + esc(x) + "</li>").join("") || "<li>적어 둔 재료가 없어요</li>";
+    $("dIngs").innerHTML = (r.amounts || r.ingredients).map((x) => "<li>" + esc(x) + "</li>").join("") || "<li>적어 둔 재료가 없어요</li>";
+    $("dMemoWrap").hidden = !r.memo;
+    $("dMemo").textContent = r.memo || "";
     $("dStepsWrap").hidden = !r.steps;
     $("dSteps").textContent = r.steps;
     const sib = r.group ? state.recipes.map((x, j) => ({ x, j })).filter((o) => o.x.group === r.group && o.j !== i) : [];
