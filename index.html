@@ -205,6 +205,75 @@ footer { border-top: 1px solid var(--line); text-align: center; padding-block: 2
 footer .f-name { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; color: var(--ink); font-size: 1.05rem; }
 footer .f-name svg { width: 22px; height: 22px; }
 
+/* 레시피 / 식단 탭 */
+.nav { border-bottom: 1px solid var(--line); }
+.nav .inner { display: flex; gap: 8px; padding-block: 12px; }
+.tab {
+  flex: 1 1 0; max-width: 240px; min-height: 54px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--surface); font-weight: 800; font-size: 1.08rem; color: var(--muted);
+}
+.tab[aria-current="page"] { background: var(--green); border-color: var(--green); color: var(--green-ink); }
+
+/* 식단 */
+.plan .inner { padding-block: 24px 40px; display: flex; flex-direction: column; gap: 16px; }
+.week-bar { display: flex; align-items: center; gap: 10px; }
+.week-bar .wk-title { flex: 1; min-width: 0; text-align: center; }
+.week-bar h2 { font-size: 1.35rem; }
+.week-bar .wk-range { color: var(--muted); font-size: .95rem; }
+.wk-btn { flex: none; width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 1.5rem; line-height: 1; }
+.to-today { align-self: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; color: var(--green-deep); }
+.days { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px 8px; min-width: 0; }
+.day.today { border-color: var(--green-deep); box-shadow: 0 0 0 2px color-mix(in srgb, var(--green) 60%, transparent); }
+.day h3 { font-size: 1.15rem; display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.day h3 .dow { color: var(--muted); font-weight: 700; }
+.day h3 .dow.sun { color: var(--pink-deep); }
+.day h3 .dow.sat { color: var(--blue-deep); }
+.day h3 .badge { font-size: .8rem; background: var(--green); color: var(--green-ink); border-radius: 6px; padding: 1px 8px; }
+.meal { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px dashed var(--line); }
+.meal:first-of-type { border-top: 0; }
+.meal .ml { flex: none; width: 46px; font-weight: 800; color: var(--muted); font-size: .95rem; line-height: 44px; }
+.meal .items { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.pi {
+  display: inline-flex; align-items: center; max-width: 100%; min-height: 44px; border-radius: 999px;
+  background: color-mix(in srgb, var(--yellow) 28%, var(--surface)); border: 1px solid color-mix(in srgb, var(--yellow-deep) 45%, var(--line));
+}
+.pi.free { background: var(--bg); border-color: var(--line); }
+.pi .go { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 2px 0 6px; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.pi.free .go { padding-left: 14px; cursor: default; }
+.pi .go:focus-visible { outline: 3px solid var(--yellow-deep); border-radius: 999px; }
+.pi img, .pi .dot { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex: none; }
+.pi .dot { display: grid; place-items: center; background: var(--c, var(--green)); color: var(--green-ink); font-size: .9rem; }
+.pi .rm { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 0; background: transparent; color: var(--muted); font-size: 1.15rem; }
+.add-meal { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px dashed color-mix(in srgb, var(--green-deep) 70%, transparent); background: transparent; color: var(--green-deep); font-weight: 700; font-size: .95rem; }
+.add-meal.more { width: 44px; padding: 0; font-size: 1.3rem; line-height: 1; }
+.plan-foot { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 6px; }
+.plan-foot .btn { align-self: stretch; max-width: 420px; width: 100%; margin: 0 auto; }
+.plan-note { font-size: .88rem; color: var(--muted); text-align: center; }
+.act-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.act-row .like-btn { margin-top: 0; }
+.plan-btn { color: var(--green-deep); }
+
+/* 식단에 넣기 창 */
+#pScrim { z-index: 22; }
+#picker { z-index: 23; }
+.pick-sec { display: flex; flex-direction: column; gap: 8px; }
+.pick-sec .chips .chip { color: var(--ink); }
+.pick-sec .search-box { flex: none; position: static; max-width: none; }
+.pick-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pick {
+  all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: flex; align-items: center; gap: 12px;
+  min-height: 60px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+}
+.pick:focus-visible { outline: 3px solid var(--yellow-deep); }
+.pick img, .pick .dot { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; flex: none; }
+.pick .dot { display: grid; place-items: center; background: var(--c, var(--green)); color: var(--green-ink); }
+.pick .pt { flex: 1; min-width: 0; }
+.pick .pt b { display: block; font-size: 1.05rem; overflow-wrap: anywhere; }
+.pick .pt span { display: block; font-size: .85rem; color: var(--muted); overflow-wrap: anywhere; }
+.pick.free { border-style: dashed; border-color: var(--green-deep); color: var(--green-deep); font-weight: 700; }
+.pick-more { font-size: .9rem; color: var(--muted); text-align: center; }
+
 /* detail sheet */
 .scrim { position: fixed; inset: 0; background: rgba(40, 32, 20, .45); z-index: 20; }
 .sheet {
@@ -299,6 +368,29 @@ footer .f-name svg { width: 22px; height: 22px; }
     <div class="baby" id="baby" hidden>우리 아기<b id="babyAge"></b></div>
   </div>
 </header>
+
+<nav class="nav" aria-label="화면 고르기">
+  <div class="inner">
+    <button class="tab" id="tabRecipes" type="button" aria-current="page">📖 레시피</button>
+    <button class="tab" id="tabPlan" type="button">📅 식단</button>
+  </div>
+</nav>
+
+<section class="plan" id="plan" hidden>
+  <div class="inner">
+    <div class="week-bar">
+      <button class="wk-btn" id="wkPrev" type="button" aria-label="지난주">‹</button>
+      <div class="wk-title"><h2 id="wkTitle">이번 주 식단</h2><p class="wk-range" id="wkRange"></p></div>
+      <button class="wk-btn" id="wkNext" type="button" aria-label="다음 주">›</button>
+    </div>
+    <button class="to-today" id="wkToday" type="button" hidden>이번 주로 돌아가기</button>
+    <div class="days" id="days"></div>
+    <div class="plan-foot">
+      <button class="btn btn-yellow" id="planShare" type="button">📤 이번 주 식단 보내기</button>
+      <p class="plan-note">식단은 이 휴대폰에만 저장돼요. 가족에게는 ‘식단 보내기’로 알려 주세요.</p>
+    </div>
+  </div>
+</section>
 
 <section class="hero">
   <div class="inner">
@@ -484,7 +576,10 @@ footer .f-name svg { width: 22px; height: 22px; }
         <span class="cat" id="dCat"></span>
         <h2 id="dTitle"></h2>
         <div class="likes" id="dLikes" hidden>♥ 아기가 잘 먹었어요</div>
-        <button class="like-btn" id="dLike" type="button" aria-pressed="false" hidden></button>
+        <div class="act-row">
+          <button class="like-btn" id="dLike" type="button" aria-pressed="false" hidden></button>
+          <button class="like-btn plan-btn" id="dPlan" type="button">📅 식단에 넣기</button>
+        </div>
         <div class="src" id="dSrc" hidden></div>
       </div>
       <button class="close" id="dClose" type="button" aria-label="닫기">×</button>
@@ -506,6 +601,33 @@ footer .f-name svg { width: 22px; height: 22px; }
     <div id="dSibWrap" hidden>
       <p class="section-label" id="dSibLabel"></p>
       <div class="chips" id="dSibs"></div>
+    </div>
+  </div>
+</section>
+
+<div class="scrim" id="pScrim" hidden></div>
+<section class="sheet" id="picker" hidden role="dialog" aria-modal="true" aria-labelledby="pTitle">
+  <div class="sheet-inner">
+    <div class="sheet-top">
+      <div style="min-width:0">
+        <p class="eyebrow" id="pSub"></p>
+        <h2 id="pTitle"></h2>
+      </div>
+      <button class="close" id="pClose" type="button" aria-label="닫기">×</button>
+    </div>
+    <div id="pWhen" class="pick-sec" hidden>
+      <p class="section-label">언제 먹을까요?</p>
+      <div class="chips" id="pDays"></div>
+      <p class="section-label" style="margin-top:8px">어느 끼니에요?</p>
+      <div class="chips" id="pMeals"></div>
+      <button class="btn btn-green" id="pOk" type="button" style="align-self:stretch;margin-top:10px">식단에 넣기</button>
+    </div>
+    <div id="pWhat" class="pick-sec" hidden>
+      <div class="search-box" style="position:static;max-width:none">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="pQ" type="search" placeholder="음식 이름이나 재료" autocomplete="off" aria-label="넣을 메뉴 찾기">
+      </div>
+      <ul class="pick-list" id="pList"></ul>
     </div>
   </div>
 </section>
@@ -785,6 +907,7 @@ footer .f-name svg { width: 22px; height: 22px; }
   }
   const EMPTY_ART = '<div class="c-green" style="width:120px">' + BOOK.replace('class="book"', 'style="width:100%"') + "</div>";
   function render() {
+    if (state.view === "plan") renderPlan();
     renderChips();
     $("clear").hidden = !state.q;
     if (!state.loaded) return;
@@ -887,7 +1010,193 @@ footer .f-name svg { width: 22px; height: 22px; }
   $("dClose").onclick = closeDetail;
   $("dLike").onclick = () => { if (state.openIdx >= 0) toggleLike(state.openIdx); };
   $("scrim").onclick = closeDetail;
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("detail").hidden) closeDetail(); });
+  document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!$("picker").hidden) closePicker(); else if (!$("detail").hidden) closeDetail(); });
+
+  // ---------- 식단 ----------
+  // 식단은 이 폰(브라우저)에만 저장됩니다. { "2026-11-05": { b: ["음식 이름"], l: [], d: [], s: [] } }
+  const PLAN_KEY = "seon-table-plan";
+  const MEALS = [["b", "아침"], ["l", "점심"], ["d", "저녁"], ["s", "간식"]];
+  const DOW = ["일", "월", "화", "수", "목", "금", "토"];
+  state.view = "recipes"; state.weekOff = 0;
+  function readPlan() { try { return JSON.parse(localStorage.getItem(PLAN_KEY) || "{}") || {}; } catch (e) { return {}; } }
+  function writePlan(p) { try { localStorage.setItem(PLAN_KEY, JSON.stringify(p)); return true; } catch (e) { return false; } }
+  const dayKey = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const today0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const weekStart = (off) => { const t = today0(); return addDays(t, -((t.getDay() + 6) % 7) + off * 7); };
+  const dayLabel = (d) => (d.getMonth() + 1) + "월 " + d.getDate() + "일 (" + DOW[d.getDay()] + ")";
+  const mealName = (k) => (MEALS.find((m) => m[0] === k) || [])[1] || "";
+  const recipeIdx = (title) => state.recipes.findIndex((r) => r.title === title);
+  function addToPlan(key, meal, title) {
+    const p = readPlan(); p[key] = p[key] || {}; p[key][meal] = p[key][meal] || [];
+    if (!p[key][meal].includes(title)) p[key][meal].push(title);
+    return writePlan(p);
+  }
+  function removeFromPlan(key, meal, n) {
+    const p = readPlan(); if (!p[key] || !p[key][meal]) return;
+    p[key][meal].splice(n, 1);
+    if (!p[key][meal].length) delete p[key][meal];
+    if (!Object.keys(p[key]).length) delete p[key];
+    writePlan(p);
+  }
+  function thumb(title) {
+    const i = recipeIdx(title), r = state.recipes[i];
+    if (r && r.photo) return '<img src="' + esc(r.photo) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">';
+    return r ? '<span class="dot ' + colorOf(i) + '" aria-hidden="true">🍚</span>' : "";
+  }
+  function renderPlan() {
+    const start = weekStart(state.weekOff), end = addDays(start, 6), tk = dayKey(today0()), plan = readPlan();
+    $("wkTitle").textContent = state.weekOff === 0 ? "이번 주 식단" : state.weekOff === 1 ? "다음 주 식단" : state.weekOff === -1 ? "지난주 식단" : "식단";
+    $("wkRange").textContent = (start.getMonth() + 1) + "월 " + start.getDate() + "일 – " + (end.getMonth() + 1) + "월 " + end.getDate() + "일";
+    $("wkToday").hidden = state.weekOff === 0;
+    const box = $("days"); box.innerHTML = "";
+    for (let n = 0; n < 7; n++) {
+      const d = addDays(start, n), key = dayKey(d), dp = plan[key] || {};
+      const el = document.createElement("article");
+      el.className = "day" + (key === tk ? " today" : "");
+      const dw = d.getDay();
+      el.innerHTML = "<h3>" + (d.getMonth() + 1) + "월 " + d.getDate() + "일 " +
+        '<span class="dow' + (dw === 0 ? " sun" : dw === 6 ? " sat" : "") + '">' + DOW[dw] + "요일</span>" +
+        (key === tk ? '<span class="badge">오늘</span>' : "") + "</h3>";
+      MEALS.forEach(([mk, ml]) => {
+        const row = document.createElement("div"); row.className = "meal";
+        row.innerHTML = '<span class="ml">' + ml + '</span><div class="items"></div>';
+        const items = row.querySelector(".items");
+        (dp[mk] || []).forEach((title, k) => {
+          const ri = recipeIdx(title);
+          const pi = document.createElement("span");
+          pi.className = "pi" + (ri < 0 ? " free" : "");
+          pi.innerHTML = '<button class="go" type="button"' + (ri < 0 ? " disabled" : "") + ">" + thumb(title) + "<span>" + esc(title) + "</span></button>" +
+            '<button class="rm" type="button" aria-label="' + esc(title) + ' 빼기">×</button>';
+          if (ri >= 0) pi.querySelector(".go").onclick = () => openDetail(ri);
+          pi.querySelector(".rm").onclick = () => {
+            removeFromPlan(key, mk, k); renderPlan();
+            toast("‘" + title + "’을(를) 뺐어요");
+          };
+          items.appendChild(pi);
+        });
+        const add = document.createElement("button");
+        const has = (dp[mk] || []).length;
+        add.type = "button"; add.className = "add-meal" + (has ? " more" : ""); add.textContent = has ? "+" : "+ 추가";
+        add.setAttribute("aria-label", dayLabel(d) + " " + ml + "에 메뉴 추가");
+        add.onclick = () => openPickWhat(key, d, mk);
+        items.appendChild(add);
+        el.appendChild(row);
+      });
+      box.appendChild(el);
+    }
+  }
+  function setView(v) {
+    state.view = v;
+    $("plan").hidden = v !== "plan";
+    document.querySelector(".hero").hidden = v === "plan";
+    $("recipes").hidden = v === "plan";
+    $("tabRecipes").setAttribute("aria-current", v === "plan" ? "false" : "page");
+    $("tabPlan").setAttribute("aria-current", v === "plan" ? "page" : "false");
+    if (v === "plan") {
+      renderPlan();
+      // 이번 주를 열면 오늘 칸이 바로 보이게
+      const t = document.querySelector(".day.today");
+      if (t && t !== document.querySelector(".day")) window.scrollTo(0, t.getBoundingClientRect().top + window.scrollY - 12);
+      else window.scrollTo(0, 0);
+    }
+  }
+  const fromHash = () => setView(location.hash === "#plan" ? "plan" : "recipes");
+  $("tabRecipes").onclick = () => { if (location.hash === "#plan") history.back(); else setView("recipes"); };
+  $("tabPlan").onclick = () => { if (location.hash !== "#plan") location.hash = "plan"; };
+  window.addEventListener("hashchange", fromHash);
+  $("wkPrev").onclick = () => { state.weekOff--; renderPlan(); };
+  $("wkNext").onclick = () => { state.weekOff++; renderPlan(); };
+  $("wkToday").onclick = () => { state.weekOff = 0; renderPlan(); };
+  $("planShare").onclick = async () => {
+    const start = weekStart(state.weekOff), plan = readPlan();
+    const lines = ["[세온 식탁] " + $("wkTitle").textContent + " (" + $("wkRange").textContent + ")", ""];
+    for (let n = 0; n < 7; n++) {
+      const d = addDays(start, n), dp = plan[dayKey(d)] || {};
+      const meals = MEALS.filter(([mk]) => dp[mk] && dp[mk].length).map(([mk, ml]) => "  " + ml + ": " + dp[mk].join(", "));
+      lines.push(dayLabel(d) + (meals.length ? "" : " -"));
+      meals.forEach((m) => lines.push(m));
+    }
+    const text = lines.join("\n");
+    try {
+      if (navigator.share) { await navigator.share({ text }); return; }
+      await navigator.clipboard.writeText(text); toast("식단을 복사했어요. 카톡에 붙여 넣어 보내세요.");
+    } catch (e) { if (!(e && e.name === "AbortError")) toast("보내기를 할 수 없는 브라우저예요"); }
+  };
+
+  // 식단에 넣기 창
+  const pick = { mode: "", key: "", date: null, meal: "", title: "", lastFocus: null };
+  function openPicker() {
+    pick.lastFocus = document.activeElement;
+    $("picker").hidden = false; $("pScrim").hidden = false; $("picker").scrollTop = 0;
+    document.body.style.overflow = "hidden";
+  }
+  function closePicker() {
+    $("picker").hidden = true; $("pScrim").hidden = true;
+    if ($("detail").hidden) document.body.style.overflow = "";
+    pick.lastFocus && pick.lastFocus.focus && pick.lastFocus.focus();
+  }
+  function openPickWhat(key, d, meal) {
+    Object.assign(pick, { mode: "what", key, date: d, meal });
+    $("pSub").textContent = dayLabel(d) + " · " + mealName(meal);
+    $("pTitle").textContent = "어떤 메뉴를 넣을까요?";
+    $("pWhen").hidden = true; $("pWhat").hidden = false;
+    $("pQ").value = ""; renderPickList();
+    openPicker(); $("pClose").focus();
+  }
+  function renderPickList() {
+    const q = $("pQ").value.trim(), terms = q.split(/\s+/).filter(Boolean);
+    const rows = state.recipes.map((r, i) => ({ r, i })).filter((o) => matches(o.r, terms))
+      .sort((a, b) => (b.r.kidLikes ? 1 : 0) - (a.r.kidLikes ? 1 : 0) || a.r.title.localeCompare(b.r.title, "ko"));
+    const ul = $("pList"); ul.innerHTML = "";
+    const addLi = (html, cls, fn) => {
+      const li = document.createElement("li"); const b = document.createElement("button");
+      b.type = "button"; b.className = "pick" + (cls ? " " + cls : ""); b.innerHTML = html; b.onclick = fn;
+      li.appendChild(b); ul.appendChild(li);
+    };
+    const put = (title) => {
+      addToPlan(pick.key, pick.meal, title); closePicker(); renderPlan();
+      toast(dayLabel(pick.date) + " " + mealName(pick.meal) + "에 넣었어요");
+    };
+    if (q && !state.recipes.some((r) => r.title === q))
+      addLi("✏️ <span class=\"pt\"><b>‘" + esc(q) + "’ 그냥 적어 넣기</b><span>레시피에 없는 메뉴(과일, 외식 등)</span></span>", "free", () => put(q));
+    rows.forEach(({ r, i }) => addLi(
+      (r.photo ? '<img src="' + esc(r.photo) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '<span class="dot ' + colorOf(i) + '" aria-hidden="true">🍚</span>') +
+      '<span class="pt"><b>' + (r.kidLikes ? "♥ " : "") + esc(r.title) + "</b><span>" + esc([r.category, r.group].filter(Boolean).join(" · ")) + "</span></span>",
+      "", () => put(r.title)));
+    if (!rows.length && !q) ul.innerHTML = '<li class="pick-more">아직 레시피가 없어요</li>';
+  }
+  $("pQ").addEventListener("input", renderPickList);
+  function openPickWhen(title) {
+    const t = today0();
+    Object.assign(pick, { mode: "when", title, date: t, key: dayKey(t), meal: new Date().getHours() < 10 ? "b" : new Date().getHours() < 14 ? "l" : "d" });
+    $("pSub").textContent = title;
+    $("pTitle").textContent = "식단에 넣기";
+    $("pWhen").hidden = false; $("pWhat").hidden = true;
+    const days = $("pDays"); days.innerHTML = "";
+    for (let n = 0; n < 7; n++) {
+      const d = addDays(t, n);
+      const lab = n === 0 ? "오늘" : n === 1 ? "내일" : (d.getMonth() + 1) + "/" + d.getDate() + " " + DOW[d.getDay()];
+      days.appendChild(chip(lab, n === 0, (e) => {
+        pick.date = d; pick.key = dayKey(d);
+        days.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === e.currentTarget)));
+      }));
+    }
+    const meals = $("pMeals"); meals.innerHTML = "";
+    MEALS.forEach(([mk, ml]) => meals.appendChild(chip(ml, mk === pick.meal, (e) => {
+      pick.meal = mk;
+      meals.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === e.currentTarget)));
+    })));
+    openPicker(); $("pClose").focus();
+  }
+  $("pOk").onclick = () => {
+    addToPlan(pick.key, pick.meal, pick.title); closePicker();
+    if (state.view === "plan") renderPlan();
+    toast(dayLabel(pick.date) + " " + mealName(pick.meal) + "에 넣었어요");
+  };
+  $("pClose").onclick = closePicker;
+  $("pScrim").onclick = closePicker;
+  $("dPlan").onclick = () => { if (state.openIdx >= 0) openPickWhen(state.recipes[state.openIdx].title); };
 
   // ---------- search & filters ----------
   let qTimer;
@@ -940,6 +1249,7 @@ footer .f-name svg { width: 22px; height: 22px; }
   }
   $("refresh").onclick = load;
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && state.loaded) load(); });
+  fromHash();
   load();
 })();
 </script>
