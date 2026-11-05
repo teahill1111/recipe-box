@@ -50,7 +50,9 @@
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-html, body { overflow-x: clip; }  /* 혹시 넘치는 요소가 생겨도 가로로 밀리지 않게 */
+/* 혹시 넘치는 요소가 생겨도 가로로 밀리지 않게 (clip을 모르는 옛 브라우저는 html의 hidden으로) */
+html { overflow-x: hidden; }
+body { overflow-x: clip; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
   font-family: var(--font); font-size: 18px; line-height: 1.6;
@@ -176,7 +178,7 @@ button.heart:active { transform: scale(.92); }
 .card-body { padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .group { display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: .88rem; color: var(--muted); }
 .group-name { font-weight: 700; color: var(--green-deep); overflow-wrap: anywhere; min-width: 0; }
-.group-n { white-space: nowrap; }
+.group-n { white-space: nowrap; flex: none; }
 .card h3 { font-size: 1.3rem; line-height: 1.35; overflow-wrap: anywhere; }
 .open { all: unset; cursor: pointer; }
 .open::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: var(--r); }
@@ -212,7 +214,9 @@ footer .f-name svg { width: 22px; height: 22px; }
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 18px calc(24px + env(safe-area-inset-bottom, 0px));
 }
-.sheet-inner { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.sheet { overflow-x: hidden; }
+.sheet-inner { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.sheet-inner > * { min-width: 0; max-width: 100%; }
 .sheet .art { border-radius: 16px; aspect-ratio: 16 / 9; }
 .sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .sheet-top h2 { font-size: 1.85rem; line-height: 1.25; overflow-wrap: anywhere; margin-top: 4px; }
