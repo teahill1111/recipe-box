@@ -223,8 +223,27 @@ footer .f-name svg { width: 22px; height: 22px; }
 .close { flex: none; width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 1.4rem; }
 .btn-yellow { background: var(--yellow); color: #3b2f0a; align-self: stretch; }
 .section-label { font-weight: 800; font-size: 1.15rem; color: var(--green-deep); margin: 0 0 8px; }
-.ing-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-.ing-list li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px; }
+.section-label .cnt { font-weight: 700; font-size: .9rem; color: var(--muted); margin-left: 6px; }
+.ing-box { background: color-mix(in srgb, var(--green) 20%, var(--surface)); border: 1px solid color-mix(in srgb, var(--green) 55%, var(--line)); border-radius: 16px; padding: 6px 16px; }
+.ing-list { list-style: none; margin: 0; padding: 0; }
+.ing-list li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px dashed color-mix(in srgb, var(--green-deep) 35%, transparent); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ing-list li:last-child { border-bottom: 0; }
+.ing-list .ck { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--green-deep); display: grid; place-items: center; font-size: .8rem; color: transparent; }
+.ing-list .nm { flex: 1; min-width: 0; font-size: 1.08rem; overflow-wrap: anywhere; }
+.ing-list .nt { display: block; font-size: .85rem; color: var(--muted); margin-top: 2px; }
+.ing-list .opt { display: inline-block; font-size: .75rem; font-weight: 700; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; margin-left: 6px; vertical-align: 2px; background: var(--surface); }
+.ing-list .amt { flex: none; max-width: 45%; text-align: right; font-weight: 800; font-size: 1.08rem; color: var(--green-ink); overflow-wrap: anywhere; }
+.ing-list li.done .ck { background: var(--green-deep); color: var(--surface); }
+.ing-list li.done .nm, .ing-list li.done .amt { text-decoration: line-through; opacity: .45; }
+.ing-hint { font-size: .85rem; color: var(--muted); margin: 6px 2px 0; }
+.step-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.step-list li { display: flex; gap: 14px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; line-height: 1.7; overflow-wrap: anywhere; }
+.step-list .no { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--yellow); color: #3b2f0a; font-weight: 800; display: grid; place-items: center; margin-top: -1px; }
+.step-list .tx { flex: 1; min-width: 0; font-size: 1.05rem; }
+.tip-box { margin-top: 12px; background: var(--note); border: 1px solid var(--note-line); border-radius: 14px; padding: 12px 16px; }
+.tip-box b { display: block; margin-bottom: 4px; }
+.tip-box ul { margin: 0; padding-left: 1.1em; line-height: 1.7; }
+.tip-box li { margin: 4px 0; overflow-wrap: anywhere; }
 .steps.memo { background: var(--note); border-color: var(--note-line); }
 .steps { white-space: pre-wrap; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; overflow-wrap: anywhere; line-height: 1.8; }
 #dSibs .chip { color: var(--ink); text-align: left; min-height: 48px; }
@@ -467,16 +486,17 @@ footer .f-name svg { width: 22px; height: 22px; }
     </div>
     <a class="btn btn-yellow" id="dLink" href="#" target="_blank" rel="noopener">인스타그램에서 영상 보기 ↗</a>
     <div>
-      <p class="section-label">재료</p>
-      <ul class="ing-list" id="dIngs"></ul>
+      <p class="section-label">🥕 재료<span class="cnt" id="dIngCnt"></span></p>
+      <div class="ing-box"><ul class="ing-list" id="dIngs"></ul></div>
+      <p class="ing-hint">준비한 재료는 눌러서 표시해 두세요.</p>
     </div>
     <div id="dMemoWrap" hidden>
       <p class="section-label">할머니 메모</p>
       <div class="steps memo" id="dMemo"></div>
     </div>
     <div id="dStepsWrap">
-      <p class="section-label">만드는 법</p>
-      <div class="steps" id="dSteps"></div>
+      <p class="section-label">🍳 만드는 법<span class="cnt" id="dStepCnt"></span></p>
+      <div id="dSteps"></div>
     </div>
     <div id="dSibWrap" hidden>
       <p class="section-label" id="dSibLabel"></p>
@@ -503,6 +523,31 @@ footer .f-name svg { width: 22px; height: 22px; }
   // ---------- helpers ----------
   const norm = (s) => (s || "").toString().toLowerCase().replace(/\s+/g, "");
   const splitIngs = (t) => (t || "").split(/[,\n、·]/).map((s) => s.trim()).filter(Boolean);
+  // "알배추 120g(약 6장)" → { name: "알배추", amt: "120g", note: "약 6장" }
+  const AMT_WORD = /^(\d[\d.,~\-\/]*[a-zA-Z가-힣°]*|약간|적당량|적당히|소량|조금|듬뿍|한|두|세|네|반|줌|모|공기|컵|숟가락|큰술|작은술|스푼|개|장|알|쪽|톨|방울|덩어리|ml|g|T|t)$/;
+  function parseIng(raw) {
+    let s = (raw || "").trim(), notes = [], opt = false, m;
+    while ((m = s.match(/\s*\(([^()]*)\)\s*$/))) { notes.unshift(m[1].trim()); s = s.slice(0, m.index).trim(); }
+    notes = notes.filter((n) => { if (n === "선택") { opt = true; return false; } return true; });
+    const words = s.split(/\s+/);
+    let k = words.length;
+    while (k > 1 && AMT_WORD.test(words[k - 1])) k--;
+    return { name: words.slice(0, k).join(" "), amt: words.slice(k).join(" "), note: notes.join(", "), opt };
+  }
+  // "1. …" 줄은 단계, "💡 …" 줄은 팁, 나머지는 앞 단계에 이어 붙임
+  function parseSteps(text) {
+    const steps = [], tips = [];
+    let numbered = false;
+    (text || "").split("\n").map((l) => l.trim()).filter(Boolean).forEach((l) => {
+      let m;
+      if (/^💡/.test(l)) tips.push(l.replace(/^💡\s*/, ""));
+      else if ((m = l.match(/^\d+\s*[.)]\s*(.*)$/))) { numbered = true; steps.push(m[1]); }
+      else if (tips.length) tips[tips.length - 1] += " " + l;
+      else if (steps.length && numbered) steps[steps.length - 1] += " " + l;
+      else steps.push(l);
+    });
+    return { steps, tips, numbered };
+  }
   const esc = (s) => (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   function highlight(text, terms) {
     let out = esc(text);
@@ -797,11 +842,28 @@ footer .f-name svg { width: 22px; height: 22px; }
     }
     const link = $("dLink");
     link.hidden = !r.url; if (r.url) link.href = r.url;
-    $("dIngs").innerHTML = (r.amounts || r.ingredients).map((x) => "<li>" + esc(x) + "</li>").join("") || "<li>적어 둔 재료가 없어요</li>";
+    const ings = (r.amounts || r.ingredients).map(parseIng);
+    $("dIngCnt").textContent = ings.length ? ings.length + "가지" : "";
+    $("dIngs").innerHTML = ings.map((g) =>
+      '<li role="checkbox" aria-checked="false" tabindex="0"><span class="ck">✓</span>' +
+      '<span class="nm">' + esc(g.name) + (g.opt ? '<span class="opt">선택</span>' : "") +
+      (g.note ? '<span class="nt">' + esc(g.note) + "</span>" : "") + "</span>" +
+      (g.amt ? '<span class="amt">' + esc(g.amt) + "</span>" : "") + "</li>").join("") ||
+      '<li style="cursor:default">적어 둔 재료가 없어요</li>';
+    $("dIngs").querySelectorAll("li[role=checkbox]").forEach((li) => {
+      const flip = () => { li.classList.toggle("done"); li.setAttribute("aria-checked", li.classList.contains("done")); };
+      li.onclick = flip;
+      li.onkeydown = (e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); } };
+    });
     $("dMemoWrap").hidden = !r.memo;
     $("dMemo").textContent = r.memo || "";
     $("dStepsWrap").hidden = !r.steps;
-    $("dSteps").textContent = r.steps;
+    const st = parseSteps(r.steps);
+    $("dStepCnt").textContent = st.steps.length > 1 ? st.steps.length + "단계" : "";
+    $("dSteps").innerHTML =
+      (st.steps.length ? '<ol class="step-list">' + st.steps.map((s, k) =>
+        '<li><span class="no">' + (st.numbered ? k + 1 : "•") + '</span><span class="tx">' + esc(s) + "</span></li>").join("") + "</ol>" : "") +
+      (st.tips.length ? '<div class="tip-box"><b>💡 꿀팁</b><ul>' + st.tips.map((t) => "<li>" + esc(t) + "</li>").join("") + "</ul></div>" : "");
     const sib = r.group ? state.recipes.map((x, j) => ({ x, j })).filter((o) => o.x.group === r.group && o.j !== i) : [];
     $("dSibWrap").hidden = !sib.length;
     $("dSibLabel").textContent = "‘" + r.group + "’의 다른 레시피";
