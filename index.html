@@ -776,7 +776,7 @@ footer .f-name svg { width: 22px; height: 22px; }
     m = s.match(/docs\.google\.com\/spreadsheets\/d\/([^/]+)/);
     if (m) {
       const gid = (s.match(/[?&#]gid=(\d+)/) || [])[1] || "0";
-      return "https://docs.google.com/spreadsheets/d/" + m[1] + "/gviz/tq?tqx=out:csv&gid=" + gid;
+      return "https://docs.google.com/spreadsheets/d/" + m[1] + "/gviz/tq?tqx=out:csv&headers=1&gid=" + gid;
     }
     return s;
   }

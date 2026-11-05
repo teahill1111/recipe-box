@@ -10,7 +10,7 @@
 - 주소: https://docs.google.com/spreadsheets/d/1Gj5zPymNTHPqkoc-d1dl--3hGcEK_44i63_PPPXvWeQ/edit?gid=1449143922
 - 탭 gid: `1449143922`
 - 현재 내용 읽기(로그인 불필요, CSV):
-  `https://docs.google.com/spreadsheets/d/1Gj5zPymNTHPqkoc-d1dl--3hGcEK_44i63_PPPXvWeQ/gviz/tq?tqx=out:csv&gid=1449143922`
+  `https://docs.google.com/spreadsheets/d/1Gj5zPymNTHPqkoc-d1dl--3hGcEK_44i63_PPPXvWeQ/gviz/tq?tqx=out:csv&headers=1&gid=1449143922`
 - 작업 전에 반드시 CSV를 읽어 **마지막 줄 번호**와 **이미 있는 음식 이름**을 확인하세요. 같은 이름이 이미 있으면 새로 넣지 말고 사용자에게 알리세요.
 
 ## 2. 칸 구성 (A~N, 첫 줄이 제목)
