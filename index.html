@@ -149,10 +149,25 @@ a { color: inherit; }
 }
 .art .label.ex { left: auto; right: 14px; top: auto; bottom: 12px; background: rgba(255,255,255,.8); color: #555; }
 .art .heart {
-  position: absolute; right: 12px; top: 12px; width: 42px; height: 42px; border-radius: 50%;
-  background: var(--surface); display: grid; place-items: center; color: var(--pink-deep);
+  position: absolute; right: 10px; top: 10px; z-index: 2; width: 48px; height: 48px; border-radius: 50%;
+  border: 0; padding: 0; background: var(--surface); display: grid; place-items: center; color: var(--pink-deep);
+  box-shadow: 0 1px 4px rgba(60, 40, 20, .12);
 }
-.art .heart svg { width: 22px; height: 22px; }
+button.heart { cursor: pointer; }
+button.heart[aria-pressed="false"] { color: var(--muted); }
+button.heart:active { transform: scale(.92); }
+.art .heart svg { width: 24px; height: 24px; }
+.like-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; margin-top: 10px;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted);
+  font-weight: 700; font-size: 1rem; cursor: pointer;
+}
+.like-btn svg { width: 22px; height: 22px; }
+.like-btn[aria-pressed="true"] { background: color-mix(in srgb, var(--pink) 35%, var(--surface)); border-color: var(--pink); color: var(--pink-deep); }
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 40; bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--bg); padding: 12px 20px; border-radius: 999px; font-weight: 700; font-size: .98rem; max-width: calc(100% - 32px); text-align: center;
+}
 .c-green { --c: var(--green); --c2: var(--green-deep); }
 .c-blue { --c: var(--blue); --c2: var(--blue-deep); }
 .c-pink { --c: var(--pink); --c2: var(--pink-deep); }
@@ -241,6 +256,9 @@ footer .f-name svg { width: 22px; height: 22px; }
         <path d="M25 24c1 6 5 10 10 9 4-1 5-6 1-9 4-3 3-8-1-9-5-1-9 3-10 9z"/>
         <path d="M24 26v14M20 42h8"/>
       </g>
+    </symbol>
+    <symbol id="heart-o" viewBox="0 0 24 24">
+      <path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.5 4.5 7 4.5c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.5 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
     </symbol>
     <symbol id="heart" viewBox="0 0 24 24">
       <path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.5 4.5 7 4.5c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.5 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z" fill="currentColor"/>
@@ -431,6 +449,7 @@ footer .f-name svg { width: 22px; height: 22px; }
   <p>사랑을 담아 만드는, 우리 아기의 한 끼</p>
 </footer>
 
+<div class="toast" id="toast" role="status" hidden></div>
 <div class="scrim" id="scrim" hidden></div>
 <section class="sheet" id="detail" hidden role="dialog" aria-modal="true" aria-labelledby="dTitle">
   <div class="sheet-inner">
@@ -441,6 +460,7 @@ footer .f-name svg { width: 22px; height: 22px; }
         <span class="cat" id="dCat"></span>
         <h2 id="dTitle"></h2>
         <div class="likes" id="dLikes" hidden>♥ 아기가 잘 먹었어요</div>
+        <button class="like-btn" id="dLike" type="button" aria-pressed="false" hidden></button>
         <div class="src" id="dSrc" hidden></div>
       </div>
       <button class="close" id="dClose" type="button" aria-label="닫기">×</button>
@@ -517,9 +537,68 @@ footer .f-name svg { width: 22px; height: 22px; }
     return BOOK + img +
       '<span class="label">' + esc(r.category) + "</span>" +
       (state.example ? '<span class="label ex">예시</span>' : "") +
-      (r.kidLikes ? '<span class="heart" title="아기가 잘 먹었어요"><svg><use href="#heart"/></svg></span>' : "");
+      (canLike() ? heartBtn(r) : r.kidLikes ? '<span class="heart" title="아기가 잘 먹었어요"><svg><use href="#heart"/></svg></span>' : "");
   }
   const colorOf = (i) => COLORS[i % COLORS.length];
+
+  // ---------- 잘 먹었어요 (하트) ----------
+  const LIKE_URL = (CFG.likeUrl || "").trim();
+  const PENDING_KEY = "seon-table-likes-pending";
+  const canLike = () => !!LIKE_URL && !state.example;
+  function heartBtn(r) {
+    return '<button class="heart" type="button" data-like aria-pressed="' + !!r.kidLikes + '" aria-label="' + esc(r.title) + ' 잘 먹었어요 표시">' +
+      '<svg><use href="#' + (r.kidLikes ? "heart" : "heart-o") + '"/></svg></button>';
+  }
+  function paintHeart(btn, on) {
+    btn.setAttribute("aria-pressed", String(on));
+    btn.querySelector("use").setAttribute("href", on ? "#heart" : "#heart-o");
+  }
+  function paintDetailLike(r) {
+    const b = $("dLike");
+    b.hidden = !canLike(); $("dLikes").hidden = canLike() || !r.kidLikes;
+    b.setAttribute("aria-pressed", String(!!r.kidLikes));
+    b.innerHTML = '<svg aria-hidden="true"><use href="#' + (r.kidLikes ? "heart" : "heart-o") + '"/></svg>' + (r.kidLikes ? "아기가 잘 먹었어요" : "잘 먹었어요 표시하기");
+  }
+  function toast(msg) {
+    const t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 2200);
+  }
+  // 시트 반영이 늦게 보일 수 있어, 방금 누른 값은 잠시 이 폰에 기억해 둡니다
+  function readPending() { try { return JSON.parse(localStorage.getItem(PENDING_KEY) || "{}"); } catch (e) { return {}; } }
+  function writePending(p) { try { localStorage.setItem(PENDING_KEY, JSON.stringify(p)); } catch (e) {} }
+  function applyPending(list) {
+    const p = readPending(), now = Date.now(); let changed = false;
+    Object.keys(p).forEach((k) => {
+      if (now - p[k].at > 120000) { delete p[k]; changed = true; return; }
+      list.forEach((r) => { if (r.title === k) r.kidLikes = p[k].on; });
+    });
+    if (changed) writePending(p);
+    return list;
+  }
+  async function toggleLike(i) {
+    const r = state.recipes[i]; if (!r || !canLike()) return;
+    const on = !r.kidLikes;
+    const setAll = (v) => {
+      state.recipes.forEach((x) => { if (x.title === r.title) x.kidLikes = v; });
+      document.querySelectorAll('.card[data-i] .heart[data-like]').forEach((b) => {
+        const x = state.recipes[+b.closest(".card").dataset.i]; if (x && x.title === r.title) paintHeart(b, v);
+      });
+      if (state.openIdx >= 0 && state.recipes[state.openIdx].title === r.title) paintDetailLike(state.recipes[state.openIdx]);
+    };
+    setAll(on);
+    const p = readPending(); p[r.title] = { on, at: Date.now() }; writePending(p);
+    toast(on ? "♥ 잘 먹었어요로 표시했어요" : "표시를 지웠어요");
+    try {
+      const res = await fetch(LIKE_URL + "?action=like&value=" + (on ? 1 : 0) + "&title=" + encodeURIComponent(r.title));
+      const j = await res.json();
+      if (!j.ok) throw new Error(j.error || "fail");
+      writeCache(state.recipes);
+    } catch (e) {
+      setAll(!on);
+      const q = readPending(); delete q[r.title]; writePending(q);
+      toast("저장하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.");
+    }
+  }
 
   // ---------- baby age ----------
   (function () {
@@ -708,7 +787,10 @@ footer .f-name svg { width: 22px; height: 22px; }
         (r.url ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">인스타에서 보기 ↗</a>' : '<span class="meta">자세히 보기 →</span>') +
         '<span class="meta">' + [r.time ? "⏱ " + r.time : "", r.ingredients.length ? "재료 " + r.ingredients.length + "가지" : ""].filter(Boolean).join(" · ") + "</span>" +
         "</div></div>";
+      a.dataset.i = r._i;
       a.querySelector(".open").onclick = () => openDetail(r._i);
+      const hb = a.querySelector(".heart[data-like]");
+      if (hb) hb.onclick = (e) => { e.stopPropagation(); toggleLike(r._i); };
       list.appendChild(a);
     });
   }
@@ -725,7 +807,7 @@ footer .f-name svg { width: 22px; height: 22px; }
     $("dGroup").innerHTML = groupHTML(r, []);
     $("dCat").textContent = r.category + (r.time ? " · ⏱ " + r.time : "");
     $("dTitle").textContent = r.title;
-    $("dLikes").hidden = !r.kidLikes;
+    paintDetailLike(r);
     const src = $("dSrc"); src.hidden = !r.source; src.innerHTML = "";
     if (r.source) {
       src.append("출처 · ");
@@ -756,6 +838,7 @@ footer .f-name svg { width: 22px; height: 22px; }
     lastFocus && lastFocus.focus && lastFocus.focus();
   }
   $("dClose").onclick = closeDetail;
+  $("dLike").onclick = () => { if (state.openIdx >= 0) toggleLike(state.openIdx); };
   $("scrim").onclick = closeDetail;
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("detail").hidden) closeDetail(); });
 
@@ -798,7 +881,7 @@ footer .f-name svg { width: 22px; height: 22px; }
       const text = await res.text();
       if (/^\s*</.test(text)) throw new Error("not-csv");
       const recipes = rowsToRecipes(parseCSV(text));
-      state.recipes = recipes; state.example = false; state.loaded = true;
+      state.recipes = applyPending(recipes); state.example = false; state.loaded = true;
       writeCache(recipes); notice("");
     } catch (e) {
       state.loaded = true;
